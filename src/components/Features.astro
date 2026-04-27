@@ -1,0 +1,63 @@
+---
+import { Database, ShieldCheck, Share2, Vote, Boxes, Lock } from '@lucide/astro';
+
+const features = [
+  {
+    icon: Database,
+    title: "Internal Share Ledger",
+    description: "LP positions are tracked via a non-transferable share system. Shares define both ownership and governance power."
+  },
+  {
+    icon: ShieldCheck,
+    title: "Refund Logic",
+    description: "If the funding target is not reached, LPs can withdraw their full ETH without loss."
+  },
+  {
+    icon: Share2,
+    title: "Uniswap Integration",
+    description: "Liquidity is deployed directly into a Uniswap V2 pair. LP tokens remain within the protocol."
+  },
+  {
+    icon: Vote,
+    title: "Treasury Governance",
+    description: "Treasury funds are controlled by LP voting. The creator has no access to these funds."
+  },
+  {
+    icon: Boxes,
+    title: "Per-Launch Isolation",
+    description: "Each launch operates on independent contracts and vaults, eliminating shared state risks."
+  },
+  {
+    icon: Lock,
+    title: "Fixed Supply Tokens",
+    description: "Tokens are minted once at deployment. No further minting or modification is possible."
+  }
+];
+---
+
+<section id="features" class="py-24 relative overflow-hidden">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-16">
+      <h2 class="text-3xl md:text-5xl font-bold mb-4">
+        Core <span class="text-primary">Mechanisms</span>
+      </h2>
+      <p class="text-muted-foreground text-lg max-w-2xl mx-auto">
+        Deterministic protocols designed for capital efficiency and participant protection.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {features.map((feature) => (
+        <div class="glass p-8 rounded-2xl hover:border-primary/50 transition-all group">
+          <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+            <feature.icon class="w-6 h-6 text-primary" />
+          </div>
+          <h3 class="text-xl font-bold mb-3">{feature.title}</h3>
+          <p class="text-muted-foreground leading-relaxed">
+            {feature.description}
+          </p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

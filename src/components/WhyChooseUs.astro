@@ -1,0 +1,76 @@
+---
+import { Shield, Lock, Users, Layers, Clock, Building2 } from '@lucide/astro';
+
+const reasons = [
+  {
+    icon: Shield,
+    title: "Refund Guarantee",
+    description: "If the funding target is not met, liquidity providers can withdraw their full ETH. No partial loss, no lock-in."
+  },
+  {
+    icon: Lock,
+    title: "No Custody Risk",
+    description: "Funds are never controlled by the creator. Liquidity is deployed directly to Uniswap and governed by smart contracts."
+  },
+  {
+    icon: Users,
+    title: "Native Governance",
+    description: "LP shares represent both ownership and voting power. No additional token or staking layer required."
+  },
+  {
+    icon: Layers,
+    title: "Per-Launch Isolation",
+    description: "Each launch deploys its own contracts and vaults. No shared state, no cross-contamination of funds."
+  },
+  {
+    icon: Clock,
+    title: "Time-Locked Liquidity",
+    description: "Funds remain locked until maturityTime, ensuring predictable exit conditions and preventing early withdrawals."
+  },
+  {
+    icon: Building2,
+    title: "LP-Controlled Treasury",
+    description: "Treasury funds are controlled by LP voting. Creators have zero access to treasury allocations."
+  }
+];
+---
+
+<section id="why-choose-us" class="py-24 relative overflow-hidden bg-black">
+  <!-- Background subtle glow -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-primary/5 blur-[120px] rounded-full -z-10"></div>
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest mb-8">
+      <span class="text-primary">💎</span> WHY REVVFI?
+    </div>
+    
+    <h2 class="text-4xl md:text-6xl font-bold mb-6">
+      Why Choose <span class="text-primary">RevvFi?</span>
+    </h2>
+    
+    <p class="text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto mb-16 leading-relaxed">
+      A token launch system designed with capital protection, governance clarity, and isolated execution.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+      {reasons.map((reason) => (
+        <div class="group relative p-8 rounded-4xl border border-white/5 bg-[#0a0a0a] hover:border-primary/30 transition-all duration-500">
+          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/20 transition-colors">
+            <reason.icon class="w-7 h-7 text-primary" />
+          </div>
+          
+          <h3 class="text-2xl font-bold mb-4">{reason.title}</h3>
+          
+          <div class="w-10 h-0.5 bg-primary/40 mb-6 group-hover:w-16 transition-all duration-300"></div>
+          
+          <p class="text-muted-foreground leading-relaxed">
+            {reason.description}
+          </p>
+          
+          <!-- Subtle bottom glow on hover -->
+          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-primary/50 group-hover:w-1/2 transition-all duration-500 blur-sm"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
