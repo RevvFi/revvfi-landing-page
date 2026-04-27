@@ -21,7 +21,7 @@
 <br/>
 
 <!-- Add your landing page screenshot here -->
-<img src="./public/preview.png" alt="RevvFi Landing Page" width="80%" style="border-radius: 12px;" />
+<img src="./public/Landing_Page.png" alt="RevvFi Landing Page" width="80%" style="border-radius: 12px;" />
 
 <br/>
 <br/>
