@@ -3,7 +3,7 @@
 
 <br/>
 
-<img src="public/android-chrome-192x192.png" width="88" height="88" alt="RevvFi Logo" />
+<img src="public/web-app-manifest-512x512.png" width="150" height="150" alt="RevvFi Logo" />
 
 <br/>
 <br/>
