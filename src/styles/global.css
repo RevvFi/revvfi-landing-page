@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #a855f7;
+  --color-primary: #ff5d01;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #1e1b4b;
-  --color-accent: #f472b6;
+  --color-secondary: #0a0a0a;
+  --color-accent: #ff8a3d;
   --color-background: #000000;
   --color-foreground: #ffffff;
   --color-muted: #18181b;
@@ -21,18 +21,18 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #ffffff, #a855f7);
+  background: linear-gradient(to right, #ffffff, #ff5d01);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.bg-purple-gradient {
-  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+.bg-primary-gradient {
+  background: linear-gradient(135deg, #ff5d01 0%, #b34100 100%);
 }

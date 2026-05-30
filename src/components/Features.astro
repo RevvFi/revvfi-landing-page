@@ -3,34 +3,34 @@ import { Database, ShieldCheck, Share2, Vote, Boxes, Lock } from '@lucide/astro'
 
 const features = [
   {
-    icon: Database,
-    title: "Internal Share Ledger",
-    description: "LP positions are tracked via a non-transferable share system. Shares define both ownership and governance power."
-  },
-  {
-    icon: ShieldCheck,
-    title: "Refund Logic",
-    description: "If the funding target is not reached, LPs can withdraw their full ETH without loss."
+    icon: Boxes,
+    title: "Multi-Market Architecture",
+    description: "Deploy independent lending markets. Borrowers manage reputation and collateral securely across isolated instances."
   },
   {
     icon: Share2,
-    title: "Uniswap Integration",
-    description: "Liquidity is deployed directly into a Uniswap V2 pair. LP tokens remain within the protocol."
+    title: "Competitive Matching",
+    description: "Lenders submit offers with varying APRs tracking dynamic interest rate discovery with seniority prioritization."
+  },
+  {
+    icon: Database,
+    title: "Collateral Escrow",
+    description: "Chainlink oracle-based valuation with strictly monitored health thresholds to protect lent capital."
   },
   {
     icon: Vote,
-    title: "Treasury Governance",
-    description: "Treasury funds are controlled by LP voting. The creator has no access to these funds."
+    title: "Dutch Auction Liquidation",
+    description: "Efficient collateral recovery via configurable step-based price reductions, providing transparent deficit recovery."
   },
   {
-    icon: Boxes,
-    title: "Per-Launch Isolation",
-    description: "Each launch operates on independent contracts and vaults, eliminating shared state risks."
+    icon: ShieldCheck,
+    title: "On-Chain Reputation",
+    description: "Borrowers earn scores from AAA to D. Penalties apply for defaults while successful loans yield increased trust."
   },
   {
     icon: Lock,
-    title: "Fixed Supply Tokens",
-    description: "Tokens are minted once at deployment. No further minting or modification is possible."
+    title: "Position NFTs",
+    description: "Lender positions are minted as transferable ERC721 tokens encoding principal, interest variables, and seniority."
   }
 ];
 ---
@@ -39,10 +39,10 @@ const features = [
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16">
       <h2 class="text-3xl md:text-5xl font-bold mb-4">
-        Core <span class="text-primary">Mechanisms</span>
+        Protocol <span class="text-primary">Highlights</span>
       </h2>
       <p class="text-muted-foreground text-lg max-w-2xl mx-auto">
-        Deterministic protocols designed for capital efficiency and participant protection.
+        Designed for capital efficiency and cross-chain financial innovation.
       </p>
     </div>
 

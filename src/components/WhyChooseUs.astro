@@ -4,33 +4,33 @@ import { Shield, Lock, Users, Layers, Clock, Building2 } from '@lucide/astro';
 const reasons = [
   {
     icon: Shield,
-    title: "Refund Guarantee",
-    description: "If the funding target is not met, liquidity providers can withdraw their full ETH. No partial loss, no lock-in."
+    title: "Oracle Security",
+    description: "Robust Chainlink integrations value collateral instantly with 2-hour staleness safeguards."
   },
   {
     icon: Lock,
-    title: "No Custody Risk",
-    description: "Funds are never controlled by the creator. Liquidity is deployed directly to Uniswap and governed by smart contracts."
+    title: "Epoch Liquidity",
+    description: "7-day epoch withdrawal cycles prevent flash bank runs ensuring systemic liquidity stability."
   },
   {
     icon: Users,
-    title: "Native Governance",
-    description: "LP shares represent both ownership and voting power. No additional token or staking layer required."
+    title: "Peer-to-Peer Focus",
+    description: "Fully decentralized structure allowing open participant alignment bypassing legacy intermediaries."
   },
   {
     icon: Layers,
-    title: "Per-Launch Isolation",
-    description: "Each launch deploys its own contracts and vaults. No shared state, no cross-contamination of funds."
+    title: "Per-Market Segregation",
+    description: "Isolate risks exclusively to individual borrower structures providing transparent, granular risk assignment."
   },
   {
     icon: Clock,
-    title: "Time-Locked Liquidity",
-    description: "Funds remain locked until maturityTime, ensuring predictable exit conditions and preventing early withdrawals."
+    title: "Dutch Liquidations",
+    description: "Continuous variable auction decreasing 5% per hour to ensure maximum collateral extraction over forced dumps."
   },
   {
     icon: Building2,
-    title: "LP-Controlled Treasury",
-    description: "Treasury funds are controlled by LP voting. Creators have zero access to treasury allocations."
+    title: "Tiered Seniority",
+    description: "Separate Senior vs. Junior lending tiers for optimized risk/reward ratios tailored to provider profiles."
   }
 ];
 ---
@@ -41,7 +41,7 @@ const reasons = [
   
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest mb-8">
-      <span class="text-primary">💎</span> WHY REVVFI?
+      <span class="text-primary"></span> WHY REVVFI?
     </div>
     
     <h2 class="text-4xl md:text-6xl font-bold mb-6">
@@ -54,7 +54,7 @@ const reasons = [
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
       {reasons.map((reason) => (
-        <div class="group relative p-8 rounded-4xl border border-white/5 bg-[#0a0a0a] hover:border-primary/30 transition-all duration-500">
+        <div class="group relative p-8 rounded-4xl border border-white/5 bg-secondary hover:border-primary/30 transition-all duration-500">
           <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/20 transition-colors">
             <reason.icon class="w-7 h-7 text-primary" />
           </div>

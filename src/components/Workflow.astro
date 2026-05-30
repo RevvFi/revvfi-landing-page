@@ -2,33 +2,33 @@
 const steps = [
   {
     num: "01",
-    title: "Launch Creation",
-    description: "Creator initializes a new launch via RevvFiFactory with predefined parameters and a fixed launch fee."
+    title: "Market Deployment",
+    description: "Borrowers deploy independent markets via the Factory, setting collateral ratios and thresholds."
   },
   {
     num: "02",
-    title: "ETH Deposits",
-    description: "Liquidity providers deposit ETH and receive non-transferable shares representing ownership and governance power."
+    title: "Offer Submission",
+    description: "Lenders provide liquidity by submitting competitive offers setting custom terms, durations, and APR limits."
   },
   {
     num: "03",
-    title: "Funding Outcome",
-    description: "If the target is reached, liquidity is deployed. If not, LPs can claim full refunds after the raise window ends."
+    title: "Collateral Escrow",
+    description: "Borrowers seamlessly deposit oracle-monitored collateral into isolated vault contracts."
   },
   {
     num: "04",
-    title: "Liquidity Deployment",
-    description: "ETH and token allocation are paired and deployed to a dedicated Uniswap V2 pool. LP tokens are held by the protocol."
+    title: "Matching & Borrowing",
+    description: "The protocol matches borrower requests favoring the lowest-rate, highest-seniority lending offers automatically."
   },
   {
     num: "05",
-    title: "Lock Period",
-    description: "Funds remain locked until maturityTime, defined as raiseEndTime plus lockDuration."
+    title: "Interest Accrual",
+    description: "Continuous synchronization compounding interest relative to specific borrowed volumes over elapsed durations."
   },
   {
     num: "06",
-    title: "Withdrawal",
-    description: "After maturity, LPs can burn shares to withdraw assets or convert their position entirely into ETH."
+    title: "Repayment & Liquidity Queue",
+    description: "Repayments augment borrower credibility. Lenders reclaim positions via 7-day Epoch distributions."
   }
 ];
 ---
@@ -38,11 +38,11 @@ const steps = [
     <div class="flex flex-col lg:flex-row gap-16">
       <div class="lg:w-1/3">
         <h2 class="text-4xl md:text-5xl font-bold mb-6">
-          Launch <br />
-          <span class="text-primary">Lifecycle</span>
+          Complete <br />
+          <span class="text-primary">Lending Cycle</span>
         </h2>
         <p class="text-muted-foreground text-lg mb-8">
-          A deterministic flow governing capital from deposit to withdrawal.
+          A deterministic flow executing capital deployment from market creation to final withdrawal logic.
         </p>
         
         <div class="glass p-6 rounded-2xl border-l-4 border-primary">
