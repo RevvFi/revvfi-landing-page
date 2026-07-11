@@ -1,0 +1,88 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { BookOpen, ArrowUpRight, Boxes, TrendingUp, Award } from '@lucide/astro';
+
+const pillars = [
+	{
+		icon: Boxes,
+		title: 'Isolated Markets',
+		description:
+			'Each market is its own contract with its own collateral, borrower, and lenders — risk in one market never spills into another.',
+	},
+	{
+		icon: TrendingUp,
+		title: 'Fixed Rates, By Design',
+		description:
+			'Lenders quote their own APR when submitting an offer. Each position accrues interest independently at the rate it was quoted — no shared, blended pool rate.',
+	},
+	{
+		icon: Award,
+		title: 'On-Chain Reputation',
+		description:
+			'Borrower repayment history is tracked on-chain, building a portable credit reputation that follows the wallet across markets.',
+	},
+];
+---
+
+<Layout title="About | RevvFi" description="RevvFi is a fixed-rate institutional lending protocol with isolated markets and on-chain reputation.">
+	<Navbar />
+	<main>
+		<PageHeader
+			eyebrow="About"
+			title="Institutional-grade lending, on-chain"
+			description="RevvFi is a fixed-rate lending protocol built for isolated, per-market credit relationships. Every market pairs one borrower with lenders who set their own rate and seniority, backed by real collateral and priced by Chainlink oracles — no pooled risk, no blended rates."
+		/>
+
+		<section class="pb-24 px-4 sm:px-6 lg:px-8">
+			<div class="max-w-4xl mx-auto space-y-16">
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+					{pillars.map((p) => (
+						<div class="glass p-6 rounded-2xl">
+							<div class="w-11 h-11 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+								<p.icon class="w-5 h-5 text-primary" />
+							</div>
+							<h2 class="text-sm font-bold uppercase tracking-widest text-white mb-2">{p.title}</h2>
+							<p class="text-sm text-muted-foreground leading-relaxed">{p.description}</p>
+						</div>
+					))}
+				</div>
+
+				<div class="border-t border-white/10 pt-12">
+					<h2 class="text-2xl font-bold mb-4">Why we built this</h2>
+					<p class="text-muted-foreground leading-relaxed max-w-2xl mb-4">
+						Most on-chain lending pools blend every lender into one shared rate, regardless of what they
+						actually agreed to. We wanted something closer to how institutional credit actually works —
+						bilateral terms, real collateral, and a rate you can actually rely on. RevvFi is our attempt
+						at that, built and audited in the open.
+					</p>
+					<a href="/team" class="inline-flex items-center gap-1 text-primary hover:text-accent transition-colors font-semibold">
+						Meet the team →
+					</a>
+				</div>
+
+				<a
+					href="https://docs.revvfi.xyz"
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center gap-4 glass rounded-2xl p-6 hover:border-primary/40 transition-all group"
+				>
+					<div class="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+						<BookOpen class="h-5 w-5 text-primary" />
+					</div>
+					<div class="flex-1">
+						<p class="text-base font-bold text-white">Explore the RevvFi Documentation</p>
+						<p class="text-sm text-muted-foreground mt-0.5">
+							Contract architecture, matching and liquidation mechanics, reputation scoring, and the
+							full event/gas reference — docs.revvfi.xyz
+						</p>
+					</div>
+					<ArrowUpRight class="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+				</a>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>

@@ -1,0 +1,99 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { HeartHandshake, ShieldCheck, Users, Rocket, TrendingUp, ArrowUpRight } from '@lucide/astro';
+
+const USES = [
+	{
+		Icon: ShieldCheck,
+		title: 'Security Audits',
+		desc: 'Independent smart-contract audits are ongoing and non-negotiable for a lending protocol handling real collateral — this is where funding matters most right now.',
+	},
+	{
+		Icon: Users,
+		title: 'Maintenance & Operations',
+		desc: 'Infrastructure, monitoring, and the ongoing engineering time it takes to keep a live protocol running safely and reliably.',
+	},
+	{
+		Icon: Rocket,
+		title: 'Growth & v2',
+		desc: 'Taking RevvFi mainstream — integrations, partnerships, and building out v2 — beyond what a small team can self-fund.',
+	},
+];
+---
+
+<Layout
+	title="Invest in RevvFi"
+	description="RevvFi is launching on mainnet. Talk to us about investing, or help fund security audits, maintenance, and v2 development."
+>
+	<Navbar />
+	<main>
+		<PageHeader
+			eyebrow="Invest & Support"
+			title="Back RevvFi's next chapter"
+			description="RevvFi is launching on mainnet — self-funded and built by a small team. The deployment itself is covered. What comes after is where we'd like help: independent security audits, ongoing maintenance, and taking the protocol mainstream with a v2."
+		/>
+
+		<section class="pb-24 px-4 sm:px-6 lg:px-8">
+			<div class="max-w-4xl mx-auto space-y-16">
+				<div class="glass rounded-2xl p-6 md:p-8">
+					<div class="flex items-start gap-4">
+						<TrendingUp class="h-5 w-5 text-primary shrink-0 mt-1" />
+						<div>
+							<h2 class="text-xl font-bold mb-2">Investors</h2>
+							<p class="text-muted-foreground leading-relaxed max-w-2xl">
+								If you're a fund, angel, or ecosystem investor and want to talk about backing RevvFi
+								directly, we're open to that conversation. Nothing here is an offer or solicitation of
+								securities — just an invitation to talk. Terms, if any, get worked out privately.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<div>
+					<h2 class="text-2xl font-bold mb-6">What sponsorship funds</h2>
+					<div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+						{USES.map(({ Icon, title, desc }) => (
+							<div class="glass rounded-2xl p-6">
+								<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+									<Icon class="h-4 w-4 text-primary" />
+								</div>
+								<h3 class="text-sm font-bold text-white mb-2">{title}</h3>
+								<p class="text-sm text-muted-foreground leading-relaxed">{desc}</p>
+							</div>
+						))}
+					</div>
+				</div>
+
+				<div class="border-t border-white/10 pt-12">
+					<div class="flex items-start gap-4">
+						<HeartHandshake class="h-5 w-5 text-primary shrink-0 mt-1" />
+						<div>
+							<h2 class="text-xl font-bold mb-2">Also open to</h2>
+							<p class="text-muted-foreground leading-relaxed max-w-2xl">
+								Partnership conversations, ecosystem grants, and hiring us for related engineering or
+								blockchain development work. If any of this is you, the easiest next step is to reach
+								out directly — see who you'd be talking to on our
+								<a href="/team" class="text-primary hover:underline">Team page</a>, then get in touch.
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<a
+					href="/contact"
+					class="flex items-center gap-4 glass rounded-2xl p-6 hover:border-primary/40 transition-all group max-w-2xl"
+				>
+					<div class="flex-1">
+						<p class="text-base font-bold text-white">Get in touch</p>
+						<p class="text-sm text-muted-foreground mt-0.5">Email, LinkedIn, GitHub, and Twitter — all on the Contact page.</p>
+					</div>
+					<ArrowUpRight class="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+				</a>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>

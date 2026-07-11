@@ -1,0 +1,117 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHeader from '../components/PageHeader.astro';
+import GithubIcon from '../components/GithubIcon.astro';
+import { ArrowUpRight, GitPullRequest, Bug, FileText, Shield } from '@lucide/astro';
+
+const GITHUB_ORG_URL = 'https://github.com/RevvFi';
+const REPOS = [
+	{ name: 'revvfi-contracts', desc: 'Solidity smart contracts (Foundry)', href: `${GITHUB_ORG_URL}/revvfi-contracts` },
+	{ name: 'revvfi-backend', desc: 'Go indexer and API', href: `${GITHUB_ORG_URL}/revvfi-backend` },
+	{ name: 'revvfi-app', desc: 'Next.js frontend', href: `${GITHUB_ORG_URL}/revvfi-app` },
+	{ name: 'revvfi-docs', desc: 'Technical documentation', href: `${GITHUB_ORG_URL}/revvfi-docs` },
+];
+---
+
+<Layout title="Contribute | RevvFi" description="How to contribute to the RevvFi protocol — code, docs, and bug reports.">
+	<Navbar />
+	<main>
+		<PageHeader
+			eyebrow="Contribute"
+			title="Contribute to RevvFi"
+			description="RevvFi is open source across all four repositories — contracts, backend, frontend, and docs. Code contributions, bug reports, and documentation fixes are all welcome."
+		/>
+
+		<section class="pb-24 px-4 sm:px-6 lg:px-8">
+			<div class="max-w-3xl mx-auto space-y-12">
+				<a
+					href={GITHUB_ORG_URL}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="flex items-center gap-4 glass rounded-2xl p-6 hover:border-primary/40 transition-all group"
+				>
+					<div class="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+						<GithubIcon class="h-5 w-5 text-primary" />
+					</div>
+					<div class="flex-1">
+						<p class="text-base font-bold text-white">github.com/RevvFi</p>
+						<p class="text-sm text-muted-foreground mt-0.5">All four repositories, issues, and pull requests</p>
+					</div>
+					<ArrowUpRight class="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+				</a>
+
+				<div>
+					<h2 class="text-xl font-bold text-white mb-4">Repositories</h2>
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+						{REPOS.map((r) => (
+							<a
+								href={r.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								class="glass rounded-2xl p-5 hover:border-primary/40 transition-all"
+							>
+								<p class="text-sm font-mono font-semibold text-white">{r.name}</p>
+								<p class="text-xs text-muted-foreground mt-1">{r.desc}</p>
+							</a>
+						))}
+					</div>
+				</div>
+
+				<div class="space-y-8 text-sm text-muted-foreground leading-relaxed">
+					<section>
+						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+							<GitPullRequest class="h-4 w-4 text-primary" /> How to Submit a Change
+						</h2>
+						<ol class="list-decimal list-inside space-y-2">
+							<li>Fork the relevant repository and create a branch off <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">main</code>.</li>
+							<li>Make your change. Keep pull requests focused on one thing — smaller PRs get reviewed faster.</li>
+							<li>
+								Run the test suite before opening a PR: <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">forge test</code> for contracts,
+								<code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">go build ./... &amp;&amp; go vet ./... &amp;&amp; go test ./...</code> for the backend,
+								<code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">npx tsc --noEmit</code> for the frontend.
+							</li>
+							<li>Open a pull request against <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">main</code> with a clear description of what changed and why.</li>
+							<li>Be responsive to review feedback — most PRs need at least one round of changes.</li>
+						</ol>
+					</section>
+
+					<section>
+						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+							<FileText class="h-4 w-4 text-primary" /> Code Standards
+						</h2>
+						<ul class="list-disc list-inside space-y-2">
+							<li>Match the existing style and conventions of the file/repo you're editing rather than introducing a new pattern.</li>
+							<li>No hardcoded addresses, private keys, or magic numbers where an existing config/env pattern already exists.</li>
+							<li>Comments should explain non-obvious "why," not restate what the code already says.</li>
+							<li>Contract changes should come with tests covering the new behavior, not just the happy path.</li>
+						</ul>
+					</section>
+
+					<section>
+						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+							<Bug class="h-4 w-4 text-primary" /> Reporting Bugs
+						</h2>
+						<p>
+							Open an issue on the relevant repository with steps to reproduce, what you expected, and
+							what actually happened. For smart contract bugs, include the affected function and, if
+							possible, a minimal Foundry test that reproduces the issue.
+						</p>
+					</section>
+
+					<section>
+						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+							<Shield class="h-4 w-4 text-primary" /> Security Issues
+						</h2>
+						<p>
+							Do not open a public issue for a security vulnerability. See our
+							<a href="/contact" class="text-primary hover:underline">Contact page</a> and reach out directly instead.
+						</p>
+					</section>
+				</div>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>

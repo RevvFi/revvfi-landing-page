@@ -1,0 +1,53 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHeader from '../components/PageHeader.astro';
+import LinkedinIcon from '../components/LinkedinIcon.astro';
+import GithubIcon from '../components/GithubIcon.astro';
+import { Mail, X as Twitter } from '@lucide/astro';
+
+const CHANNELS = [
+	{ label: 'Email', value: 'preetsinghmakkar154@gmail.com', href: 'mailto:preetsinghmakkar154@gmail.com', Icon: Mail },
+	{ label: 'LinkedIn', value: 'linkedin.com/in/preet-singh-a65967302', href: 'https://www.linkedin.com/in/preet-singh-a65967302/', Icon: LinkedinIcon },
+	{ label: 'GitHub', value: 'github.com/preetsinghmakkar', href: 'https://github.com/preetsinghmakkar', Icon: GithubIcon },
+	{ label: 'Twitter', value: '@RaOne_0xDev', href: 'https://twitter.com/RaOne_0xDev', Icon: Twitter },
+];
+---
+
+<Layout title="Contact | RevvFi" description="Get in touch with the RevvFi team.">
+	<Navbar />
+	<main>
+		<PageHeader
+			eyebrow="Contact"
+			title="Get in touch"
+			description="Questions about the protocol, a partnership inquiry, or found a bug? Reach out through any of the channels below."
+		/>
+
+		<section class="pb-24 px-4 sm:px-6 lg:px-8">
+			<div class="max-w-2xl mx-auto space-y-4">
+				{CHANNELS.map(({ label, value, href, Icon }) => (
+					<a
+						href={href}
+						target={href.startsWith('mailto:') ? undefined : '_blank'}
+						rel="noopener noreferrer"
+						class="flex items-center gap-4 glass rounded-2xl p-5 hover:border-primary/40 transition-all"
+					>
+						<div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+							<Icon class="h-4 w-4 text-primary" />
+						</div>
+						<div>
+							<p class="text-xs text-muted-foreground">{label}</p>
+							<p class="text-sm font-semibold text-white">{value}</p>
+						</div>
+					</a>
+				))}
+
+				<p class="text-xs text-muted-foreground pt-4">
+					For security disclosures, please email us directly rather than posting publicly.
+				</p>
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>

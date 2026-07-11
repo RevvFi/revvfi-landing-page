@@ -1,22 +1,64 @@
 ---
+import { Menu, X } from '@lucide/astro';
+
+const links = [
+	{ href: '/#features', label: 'Features' },
+	{ href: '/#why-choose-us', label: 'Why RevvFi' },
+	{ href: '/#workflow', label: 'Lifecycle' },
+	{ href: '/#safety', label: 'Safety' },
+	{ href: '/about', label: 'About' },
+	{ href: '/team', label: 'Team' },
+	{ href: 'https://docs.revvfi.xyz/', label: 'Docs' },
+];
 ---
 
 <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-white/10">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-20">
-      <div class="flex items-center gap-2">
-        <img src="/favicon.svg" alt="RevvFi Logo" class="h-16 w-16" />
-        <span class="text-xl font-bold tracking-tight">RevvFi</span>
-      </div>
-      
-      <div class="hidden md:flex items-center space-x-8">
-        <a href="#features" class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">Features</a>
-        <a href="#why-choose-us" class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">Why RevvFi</a>
-        <a href="#workflow" class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">Lifecycle</a>
-        <a href="#safety" class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">Safety</a>
-        <a href="https://docs.revvfi.xyz/" class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">Docs</a>
-        <a href="http://app.revvfi.xyz/" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-colors">App</a>
-      </div>
-    </div>
-  </div>
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+		<div class="flex justify-between items-center h-20">
+			<a href="/" class="flex items-center gap-2">
+				<img src="/favicon.svg" alt="RevvFi Logo" class="h-16 w-16" />
+				<span class="text-xl font-bold tracking-tight">RevvFi</span>
+			</a>
+
+			<div class="hidden lg:flex items-center space-x-8">
+				{links.map((l) => (
+					<a href={l.href} class="text-sm font-medium text-muted-foreground hover:text-white transition-colors">{l.label}</a>
+				))}
+				<a href="http://app.revvfi.xyz/" class="bg-white text-black px-5 py-2 rounded-full text-sm font-bold hover:bg-gray-200 transition-colors">App</a>
+			</div>
+
+			<button
+				id="mobile-menu-button"
+				aria-label="Toggle navigation"
+				class="lg:hidden flex items-center justify-center h-10 w-10 -mr-2 text-white"
+			>
+				<Menu id="menu-icon" class="h-6 w-6" />
+				<X id="close-icon" class="h-6 w-6 hidden" />
+			</button>
+		</div>
+	</div>
+
+	<div id="mobile-menu" class="hidden lg:hidden border-t border-white/10 bg-black">
+		<div class="px-4 sm:px-6 py-4 flex flex-col gap-1">
+			{links.map((l) => (
+				<a href={l.href} class="py-3 text-sm font-medium text-muted-foreground hover:text-white transition-colors">{l.label}</a>
+			))}
+			<a href="http://app.revvfi.xyz/" class="mt-2 bg-white text-black px-5 py-3 rounded-full text-sm font-bold text-center hover:bg-gray-200 transition-colors">
+				Launch App
+			</a>
+		</div>
+	</div>
 </nav>
+
+<script>
+	const button = document.getElementById('mobile-menu-button');
+	const menu = document.getElementById('mobile-menu');
+	const menuIcon = document.getElementById('menu-icon');
+	const closeIcon = document.getElementById('close-icon');
+
+	button?.addEventListener('click', () => {
+		menu?.classList.toggle('hidden');
+		menuIcon?.classList.toggle('hidden');
+		closeIcon?.classList.toggle('hidden');
+	});
+</script>

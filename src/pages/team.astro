@@ -1,0 +1,80 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import PageHeader from '../components/PageHeader.astro';
+import GithubIcon from '../components/GithubIcon.astro';
+import LinkedinIcon from '../components/LinkedinIcon.astro';
+import { X as Twitter, Globe } from '@lucide/astro';
+
+const TEAM = [
+	{
+		name: 'Preet Singh',
+		role: 'Founder',
+		photo: '/team/preetsingh.jpeg',
+		bio:
+			"Smart contract engineer specializing in secure, scalable decentralized systems across EVM and Cosmos ecosystems. Currently a Smart Contract Engineer at iTechnolabs, working on tokenized financial systems with role-based access control and extensive test coverage. Previously a full-stack blockchain engineer at Ungate.io, building wallet infrastructure and transaction authorization for multi-chain EVM networks, and a Web3 security researcher who identified vulnerabilities across DeFi protocols via Code4rena, Cantina, and Sherlock. Builder of RevvFi, Vesper Interchain (a Cosmos SDK chain bridging IBC collateral into EVM DeFi), and TokenMaker.",
+		links: [
+			{ label: 'Portfolio', href: 'https://www.preetsingh.tech/', Icon: Globe },
+			{ label: 'GitHub', href: 'https://github.com/preetsinghmakkar', Icon: GithubIcon },
+			{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/preet-singh-a65967302/', Icon: LinkedinIcon },
+			{ label: 'Twitter', href: 'https://twitter.com/RaOne_0xDev', Icon: Twitter },
+		],
+	},
+	{
+		name: 'Anitesh Kumar',
+		role: 'Co-Founder',
+		photo: '/team/ani.jpeg',
+		bio:
+			"Full-stack developer and backend blockchain engineer, working primarily in Go. Anitesh is a core contributor to RevvFi's protocol and infrastructure, and drives DevOps and deployments across the stack — from local development environments through to testnet rollouts.",
+		links: [
+			{ label: 'GitHub', href: 'https://github.com/KakshiDEV56', Icon: GithubIcon },
+			{ label: 'LinkedIn', href: 'https://www.linkedin.com/in/anitesh-kumar-94035b312/', Icon: LinkedinIcon },
+		],
+	},
+];
+---
+
+<Layout title="Team | RevvFi" description="Meet the team behind RevvFi.">
+	<Navbar />
+	<main>
+		<PageHeader eyebrow="Team" title="The people behind RevvFi" />
+
+		<section class="pb-24 px-4 sm:px-6 lg:px-8">
+			<div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8">
+				{TEAM.map((person) => (
+					<div class="glass p-8 rounded-2xl hover:border-primary/30 transition-all">
+						<div class="flex items-center gap-4">
+							<img
+								src={person.photo}
+								alt={person.name}
+								width="72"
+								height="72"
+								class="rounded-full object-cover shrink-0 w-18 h-18"
+							/>
+							<div>
+								<h2 class="text-lg font-bold text-white">{person.name}</h2>
+								<p class="text-sm text-primary font-semibold">{person.role}</p>
+							</div>
+						</div>
+						<p class="text-sm text-muted-foreground leading-relaxed mt-5">{person.bio}</p>
+						<div class="flex items-center gap-4 mt-5">
+							{person.links.map(({ label, href, Icon }) => (
+								<a
+									href={href}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+								>
+									<Icon class="h-3.5 w-3.5" />
+									{label}
+								</a>
+							))}
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	</main>
+	<Footer />
+</Layout>
