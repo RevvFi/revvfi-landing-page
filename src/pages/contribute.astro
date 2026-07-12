@@ -36,14 +36,14 @@ const REPOS = [
 						<GithubIcon class="h-5 w-5 text-primary" />
 					</div>
 					<div class="flex-1">
-						<p class="text-base font-bold text-white">github.com/RevvFi</p>
+						<p class="text-base font-bold text-foreground">github.com/RevvFi</p>
 						<p class="text-sm text-muted-foreground mt-0.5">All four repositories, issues, and pull requests</p>
 					</div>
 					<ArrowUpRight class="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
 				</a>
 
 				<div>
-					<h2 class="text-xl font-bold text-white mb-4">Repositories</h2>
+					<h2 class="text-xl font-bold text-foreground mb-4">Repositories</h2>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 						{REPOS.map((r) => (
 							<a
@@ -52,7 +52,7 @@ const REPOS = [
 								rel="noopener noreferrer"
 								class="glass rounded-2xl p-5 hover:border-primary/40 transition-all"
 							>
-								<p class="text-sm font-mono font-semibold text-white">{r.name}</p>
+								<p class="text-sm font-mono font-semibold text-foreground">{r.name}</p>
 								<p class="text-xs text-muted-foreground mt-1">{r.desc}</p>
 							</a>
 						))}
@@ -61,24 +61,24 @@ const REPOS = [
 
 				<div class="space-y-8 text-sm text-muted-foreground leading-relaxed">
 					<section>
-						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+						<h2 class="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
 							<GitPullRequest class="h-4 w-4 text-primary" /> How to Submit a Change
 						</h2>
 						<ol class="list-decimal list-inside space-y-2">
-							<li>Fork the relevant repository and create a branch off <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">main</code>.</li>
+							<li>Fork the relevant repository and create a branch off <code class="text-xs bg-black/5 px-1.5 py-0.5 rounded">main</code>.</li>
 							<li>Make your change. Keep pull requests focused on one thing — smaller PRs get reviewed faster.</li>
 							<li>
-								Run the test suite before opening a PR: <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">forge test</code> for contracts,
-								<code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">go build ./... &amp;&amp; go vet ./... &amp;&amp; go test ./...</code> for the backend,
-								<code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">npx tsc --noEmit</code> for the frontend.
+								Run the test suite before opening a PR: <code class="text-xs bg-black/5 px-1.5 py-0.5 rounded">forge test</code> for contracts,
+								<code class="text-xs bg-black/5 px-1.5 py-0.5 rounded">go build ./... &amp;&amp; go vet ./... &amp;&amp; go test ./...</code> for the backend,
+								<code class="text-xs bg-black/5 px-1.5 py-0.5 rounded">npx tsc --noEmit</code> for the frontend.
 							</li>
-							<li>Open a pull request against <code class="text-xs bg-white/5 px-1.5 py-0.5 rounded">main</code> with a clear description of what changed and why.</li>
+							<li>Open a pull request against <code class="text-xs bg-black/5 px-1.5 py-0.5 rounded">main</code> with a clear description of what changed and why.</li>
 							<li>Be responsive to review feedback — most PRs need at least one round of changes.</li>
 						</ol>
 					</section>
 
 					<section>
-						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+						<h2 class="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
 							<FileText class="h-4 w-4 text-primary" /> Code Standards
 						</h2>
 						<ul class="list-disc list-inside space-y-2">
@@ -90,7 +90,7 @@ const REPOS = [
 					</section>
 
 					<section>
-						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+						<h2 class="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
 							<Bug class="h-4 w-4 text-primary" /> Reporting Bugs
 						</h2>
 						<p>
@@ -101,7 +101,7 @@ const REPOS = [
 					</section>
 
 					<section>
-						<h2 class="text-lg font-bold text-white mb-3 flex items-center gap-2">
+						<h2 class="text-lg font-bold text-foreground mb-3 flex items-center gap-2">
 							<Shield class="h-4 w-4 text-primary" /> Security Issues
 						</h2>
 						<p>

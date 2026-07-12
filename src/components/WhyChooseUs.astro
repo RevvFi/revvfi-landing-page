@@ -1,86 +1,262 @@
 ---
-import { Shield, Lock, Users, Layers, Clock, Building2 } from '@lucide/astro';
+// "Why Choose RevvFi" — product-showcase redesign: one large browser-style
+// frame containing an asymmetric 2x2 composition (hero illustration + three
+// feature panels), each with its own small flow-diagram illustration built
+// from Solar icons (no Lucide in this section) rather than generic feature
+// cards. Content is drawn from the same real protocol mechanics used
+// elsewhere on the site (Safety/FAQ sections), not invented.
+import { Icon } from 'astro-icon/components';
+import FlowIllustration from './FlowIllustration.astro';
 
-const reasons = [
-  {
-    icon: Shield,
-    title: "Oracle Security",
-    description: "Robust Chainlink integrations value collateral instantly with 2-hour staleness safeguards."
-  },
-  {
-    icon: Lock,
-    title: "Epoch Liquidity",
-    description: "7-day epoch withdrawal cycles prevent flash bank runs ensuring systemic liquidity stability."
-  },
-  {
-    icon: Users,
-    title: "Peer-to-Peer Focus",
-    description: "Fully decentralized structure allowing open participant alignment bypassing legacy intermediaries."
-  },
-  {
-    icon: Layers,
-    title: "Per-Market Segregation",
-    description: "Isolate risks exclusively to individual borrower structures providing transparent, granular risk assignment."
-  },
-  {
-    icon: Clock,
-    title: "Dutch Liquidations",
-    description: "Continuous variable auction decreasing 5% per hour to ensure maximum collateral extraction over forced dumps."
-  },
-  {
-    icon: Building2,
-    title: "Tiered Seniority",
-    description: "Separate Senior vs. Junior lending tiers for optimized risk/reward ratios tailored to provider profiles."
-  }
+const heroFlow = [
+	{ icon: 'solar:calendar-linear', label: 'Epoch' },
+	{ icon: 'solar:safe-2-linear', label: 'Vault' },
+	{ icon: 'solar:arrow-down-linear', label: 'Withdraw' },
+	{ icon: 'solar:database-linear', label: 'Liquidity' },
+];
+
+const panels = [
+	{
+		tag: 'Oracle Security',
+		title: 'Collateral priced in real time',
+		description: 'Robust Chainlink integrations value collateral instantly, with a 2-hour staleness safeguard.',
+		flow: [
+			{ icon: 'solar:cpu-bolt-linear', label: 'Node' },
+			{ icon: 'solar:graph-linear', label: 'Price Feed' },
+			{ icon: 'solar:safe-2-linear', label: 'Vault' },
+			{ icon: 'solar:user-id-linear', label: 'Borrower' },
+		],
+	},
+	{
+		tag: 'Reputation',
+		title: 'Credit that follows the wallet',
+		description: 'Repayment history is tracked on-chain and scored AAA to D, building portable credit across markets.',
+		flow: [
+			{ icon: 'solar:wallet-2-linear', label: 'Wallet' },
+			{ icon: 'solar:graph-linear', label: 'Score' },
+			{ icon: 'solar:medal-ribbon-linear', label: 'AAA' },
+			{ icon: 'solar:check-circle-linear', label: 'Approved' },
+		],
+	},
+	{
+		tag: 'Dutch Liquidation',
+		title: 'Transparent, market-driven recovery',
+		description: 'A continuous variable auction decreases 5% per hour, maximizing recovery over a forced dump.',
+		flow: [
+			{ icon: 'solar:sledgehammer-linear', label: 'Auction' },
+			{ icon: 'solar:gallery-linear', label: 'Position' },
+			{ icon: 'solar:shield-check-linear', label: 'Collateral' },
+			{ icon: 'solar:cup-linear', label: 'Highest Bid' },
+		],
+	},
 ];
 ---
 
-<section id="why-choose-us" class="py-24 relative overflow-hidden bg-black">
+<section id="why-choose-us" class="relative py-28 overflow-hidden bg-white">
+	<!-- Background: barely-visible grid + noise + soft radial glow -->
+	<div class="absolute inset-0 -z-10">
+		<div
+			class="absolute inset-0 opacity-[0.03] [background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E')]"
+		></div>
+		<div
+			class="absolute inset-0 opacity-[0.035]"
+			style="background-image: linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px); background-size: 56px 56px;"
+		></div>
+		<div class="absolute top-0 left-1/4 w-[550px] h-[550px] bg-primary/[0.05] blur-[140px] rounded-full"></div>
+		<div class="absolute bottom-0 right-1/5 w-[420px] h-[420px] bg-primary/[0.03] blur-[130px] rounded-full"></div>
+	</div>
 
-    <!-- Background Image restricted to this section -->
-  <div class="absolute inset-0 z-0">
-    <img
-      src="/why_choose_revvfi.webp"
-      alt="Why Choose RevvFi Background"
-      class="w-full h-full object-cover opacity-10 mix-blend-overlay"
-    />
-    <div class="absolute inset-0 bg-linear-to-b from-black via-transparent to-black"></div>
-  </div>
+	<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+		<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-black/10 bg-black/5 text-xs font-bold uppercase tracking-widest mb-8 opacity-0" data-wcu-fade>
+			<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> WHY REVVFI?
+		</div>
 
-  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-200 bg-primary/5 blur-[120px] rounded-full -z-10"></div>
-  
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/5 text-xs font-bold uppercase tracking-widest mb-8">
-      <span class="text-primary"></span> WHY REVVFI?
-    </div>
-    
-    <h2 class="text-4xl md:text-6xl font-bold mb-6">
-      Why Choose <span class="text-primary">RevvFi?</span>
-    </h2>
-    
-    <p class="text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto mb-16 leading-relaxed">
-      A lending protocol designed with capital protection, transparent terms, and isolated execution.
-    </p>
+		<h2 class="font-serif text-4xl md:text-6xl font-semibold mb-6 opacity-0" data-wcu-fade>
+			Why Choose <span class="text-primary">RevvFi?</span>
+		</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
-      {reasons.map((reason) => (
-        <div class="group relative p-8 rounded-4xl border border-white/5 bg-secondary hover:border-primary/30 transition-all duration-500">
-          <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/20 transition-colors">
-            <reason.icon class="w-7 h-7 text-primary" />
-          </div>
-          
-          <h3 class="text-2xl font-bold mb-4">{reason.title}</h3>
-          
-          <div class="w-10 h-0.5 bg-primary/40 mb-6 group-hover:w-16 transition-all duration-300"></div>
-          
-          <p class="text-muted-foreground leading-relaxed">
-            {reason.description}
-          </p>
-          
-          <!-- Subtle bottom glow on hover -->
-          <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-px bg-primary/50 group-hover:w-1/2 transition-all duration-500 blur-sm"></div>
-        </div>
-      ))}
-    </div>
-  </div>
+		<p class="text-muted-foreground text-lg md:text-xl max-w-2xl mx-auto mb-16 leading-relaxed opacity-0" data-wcu-fade>
+			A lending protocol designed with capital protection, transparent terms, and isolated execution.
+		</p>
+
+		<!-- Browser-window frame — the product showcase itself -->
+		<div class="wcu-browser relative rounded-3xl border border-black/10 bg-white shadow-2xl shadow-black/10 overflow-hidden text-left opacity-0" data-wcu-browser>
+			<div class="flex items-center gap-4 px-5 py-3.5 border-b border-black/5 bg-secondary opacity-0" data-wcu-topbar>
+				<div class="flex gap-1.5 shrink-0">
+					<span class="w-3 h-3 rounded-full bg-[#ff5f57]"></span>
+					<span class="w-3 h-3 rounded-full bg-[#febc2e]"></span>
+					<span class="w-3 h-3 rounded-full bg-[#28c840]"></span>
+				</div>
+				<div class="flex-1 flex justify-center">
+					<div class="flex items-center gap-2 bg-white border border-black/10 rounded-full px-4 py-1 text-xs text-muted-foreground">
+						<Icon name="solar:global-linear" width={14} height={14} />
+						app.revvfi.xyz
+					</div>
+				</div>
+				<div class="w-14 shrink-0"></div>
+			</div>
+
+			<!-- Ambient particles drifting inside the frame -->
+			<div class="wcu-particles absolute inset-0 pointer-events-none" aria-hidden="true">
+				{Array.from({ length: 14 }).map(() => (
+					<span class="wcu-particle absolute rounded-full bg-primary"></span>
+				))}
+			</div>
+
+			<div class="grid grid-cols-1 lg:grid-cols-2 divide-y divide-x-0 lg:divide-x divide-black/5 relative">
+				<div class="wcu-panel relative p-10 flex flex-col items-center justify-center text-center gap-6 opacity-0" data-wcu-panel data-wcu-hero>
+					<FlowIllustration steps={heroFlow} size="lg" />
+					<span class="text-xs font-bold uppercase tracking-widest text-muted-foreground">Epoch-Based Liquidity</span>
+				</div>
+
+				{panels.map((p) => (
+					<div class="wcu-panel group relative p-8 opacity-0 transition-[border-color,box-shadow] duration-300" data-wcu-panel>
+						<div class="flex items-center gap-2 mb-4">
+							<span class="w-1.5 h-1.5 rounded-full bg-primary wcu-dot"></span>
+							<span class="text-xs font-bold uppercase tracking-widest text-primary">{p.tag}</span>
+						</div>
+						<h3 class="text-xl font-bold mb-2 leading-snug">{p.title}</h3>
+						<p class="text-sm text-muted-foreground leading-relaxed mb-6 max-w-[30ch]">{p.description}</p>
+						<FlowIllustration steps={p.flow} size="sm" />
+					</div>
+				))}
+			</div>
+		</div>
+	</div>
 </section>
+
+<style>
+	.wcu-browser {
+		transform: scale(0.96);
+	}
+	.wcu-panel {
+		--spot-x: 50%;
+		--spot-y: 50%;
+	}
+	.wcu-panel::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(240px circle at var(--spot-x) var(--spot-y), rgba(255, 93, 1, 0.06), transparent 70%);
+		opacity: 0;
+		transition: opacity 0.3s ease;
+		pointer-events: none;
+	}
+	.wcu-panel:hover::before {
+		opacity: 1;
+	}
+	.wcu-panel:hover {
+		box-shadow: inset 0 0 0 1px rgba(255, 93, 1, 0.25);
+	}
+	.wcu-particle {
+		will-change: transform, opacity;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	const BROWSER_DURATION_S = 0.9;
+	const TOPBAR_DELAY_S = 0.15;
+	const TOPBAR_DURATION_S = 0.5;
+	const PANEL_STAGGER_S = 0.25;
+	const PANEL_DURATION_S = 0.6;
+	const FLOW_PLAY_DELAY_S = 0.2; // let the panel itself settle before its illustration draws
+	const HOVER_LIFT_PX = 6;
+	const HOVER_DURATION_S = 0.25;
+	const HOVER_ICON_ROTATE_DEG = 3;
+
+	function initWhyChooseUs(section: HTMLElement) {
+		const fadeEls = Array.from(section.querySelectorAll<HTMLElement>('[data-wcu-fade]'));
+		const browser = section.querySelector<HTMLElement>('[data-wcu-browser]');
+		const topbar = section.querySelector<HTMLElement>('[data-wcu-topbar]');
+		const panels = Array.from(section.querySelectorAll<HTMLElement>('[data-wcu-panel]'));
+		const particles = Array.from(section.querySelectorAll<HTMLElement>('.wcu-particle'));
+		if (!browser || !topbar || panels.length === 0) return;
+
+		// ---- Sequenced entrance: badge/heading -> browser -> topbar ->
+		// panels one-by-one -> each panel's illustration draws itself ->
+		// particles. Nothing fires simultaneously. ----
+		const master = gsap.timeline({ paused: true });
+		master
+			.to(fadeEls, { opacity: 1, y: 0, duration: 0.6, ease: 'sine.inOut', stagger: 0.12 })
+			.to(browser, { opacity: 1, scale: 1, duration: BROWSER_DURATION_S, ease: 'power2.inOut' }, '+=0.1')
+			.to(topbar, { opacity: 1, duration: TOPBAR_DURATION_S, ease: 'sine.inOut' }, `+=${TOPBAR_DELAY_S}`);
+
+		panels.forEach((panel) => {
+			master.to(panel, { opacity: 1, duration: PANEL_DURATION_S, ease: 'sine.inOut' }, `+=${PANEL_STAGGER_S}`);
+			master.call(
+				() => {
+					const flow = panel.querySelector<HTMLElement & { __flowPlay?: () => void }>('[data-flow]');
+					flow?.__flowPlay?.();
+				},
+				undefined,
+				`+=${FLOW_PLAY_DELAY_S}`
+			);
+		});
+
+		master.call(() => {
+			particles.forEach((particle) => {
+				gsap.set(particle, {
+					width: gsap.utils.random(2, 4),
+					height: gsap.utils.random(2, 4),
+					left: `${gsap.utils.random(5, 95)}%`,
+					top: `${gsap.utils.random(5, 95)}%`,
+					opacity: 0,
+				});
+				gsap.to(particle, { opacity: gsap.utils.random(0.08, 0.25), duration: 1, ease: 'sine.inOut' });
+
+				function drift() {
+					gsap.to(particle, {
+						x: gsap.utils.random(-20, 20),
+						y: gsap.utils.random(-20, 20),
+						duration: gsap.utils.random(8, 16),
+						ease: 'sine.inOut',
+						onComplete: drift,
+					});
+				}
+				drift();
+			});
+		});
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					master.play();
+					observer.disconnect();
+				});
+			},
+			{ threshold: 0.2 }
+		);
+		observer.observe(browser);
+
+		// ---- Hover: lift, icon rotate, illustration replay, cursor-follow glow ----
+		panels.forEach((panel) => {
+			panel.addEventListener('mouseenter', () => {
+				gsap.to(panel, { y: -HOVER_LIFT_PX, duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+				gsap.to(panel.querySelectorAll('.flow-badge'), {
+					rotate: HOVER_ICON_ROTATE_DEG,
+					duration: HOVER_DURATION_S,
+					ease: 'power2.inOut',
+					stagger: 0.03,
+				});
+				const flow = panel.querySelector<HTMLElement & { __flowPlay?: () => void }>('[data-flow]');
+				flow?.__flowPlay?.();
+			});
+			panel.addEventListener('mouseleave', () => {
+				gsap.to(panel, { y: 0, duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+				gsap.to(panel.querySelectorAll('.flow-badge'), { rotate: 0, duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+			});
+			panel.addEventListener('mousemove', (e) => {
+				const rect = panel.getBoundingClientRect();
+				const x = ((e as MouseEvent).clientX - rect.left) / rect.width * 100;
+				const y = ((e as MouseEvent).clientY - rect.top) / rect.height * 100;
+				panel.style.setProperty('--spot-x', `${x}%`);
+				panel.style.setProperty('--spot-y', `${y}%`);
+			});
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('#why-choose-us').forEach(initWhyChooseUs);
+</script>

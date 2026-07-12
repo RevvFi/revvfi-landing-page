@@ -20,9 +20,15 @@ const { title, description = "RevvFi - Fixed-Rate Institutional Lending Protocol
 		<meta name="description" content={description} />
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+		<!-- General Sans (Fontshare): used for the "Complete Lending Cycle" section's
+		     heading per its own typographic spec, distinct from the site's default
+		     Inter/Playfair pairing used elsewhere. -->
+		<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+		<link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600,700&display=swap" rel="stylesheet">
 	</head>
-	<body class="bg-black text-white antialiased">
+	<body class="bg-background text-foreground antialiased">
+		<div class="fixed top-0 inset-x-0 h-1.5 bg-primary z-60"></div>
 		<slot />
 	</body>
 </html>

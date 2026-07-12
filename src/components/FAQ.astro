@@ -1,0 +1,71 @@
+---
+import JellyFish from './JellyFish.astro';
+
+const faqs = [
+  {
+    q: 'What is RevvFi?',
+    a: 'A fixed-rate, peer-to-peer lending protocol. Each market pairs one borrower with lenders who set their own rate and seniority, backed by real collateral — no pooled risk, no blended rates.',
+  },
+  {
+    q: 'How does interest rate discovery work?',
+    a: 'Lenders submit offers with their own APR and seniority. The protocol matches borrower requests to the lowest-rate, highest-seniority offers automatically — each position accrues interest independently at the rate it was quoted.',
+  },
+  {
+    q: 'How is my collateral protected?',
+    a: 'Collateral is valued by Chainlink oracles with a 2-hour staleness guard, and every market enforces strictly monitored health thresholds before a position can be opened or must be liquidated.',
+  },
+  {
+    q: 'What happens if a borrower defaults?',
+    a: 'Collateral recovery runs through a Dutch auction with a configurable step-based price reduction, giving transparent, market-driven deficit recovery instead of a fire sale.',
+  },
+  {
+    q: 'Can I withdraw my funds any time?',
+    a: 'Withdrawals run on 7-day epoch cycles by design — this prevents flash bank runs and keeps liquidity stable for borrowers mid-term.',
+  },
+  {
+    q: 'Is borrower reputation portable across markets?',
+    a: 'Yes. Repayment history is tracked on-chain and scored from AAA to D, building a portable credit reputation tied to the wallet, not to any single market.',
+  },
+  {
+    q: 'Which networks does RevvFi support?',
+    a: 'RevvFi is currently live on Sepolia testnet while the protocol goes through audits, with mainnet deployment planned to follow.',
+  },
+];
+---
+
+<section id="faq" class="py-24 relative overflow-hidden bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
+      <div>
+        <h2 class="font-serif text-4xl md:text-5xl font-semibold tracking-tight mb-2 leading-tight">
+          Frequently asked <br /> questions
+        </h2>
+        <p class="text-muted-foreground text-lg mt-4 mb-8 max-w-md">
+          Everything you need to know about how RevvFi's markets, rates, and liquidations actually work.
+        </p>
+        <div class="flex justify-center lg:justify-start">
+          <JellyFish />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        {faqs.map((item) => (
+          <details class="group glass rounded-2xl px-6 py-5 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex items-center justify-between gap-4 cursor-pointer list-none font-semibold text-foreground">
+              {item.q}
+              <span class="shrink-0 relative w-5 h-5">
+                <span class="absolute inset-0 flex items-center justify-center transition-transform duration-200 group-open:rotate-45">
+                  <span class="absolute w-3.5 h-0.5 bg-foreground rounded-full"></span>
+                  <span class="absolute w-0.5 h-3.5 bg-foreground rounded-full"></span>
+                </span>
+              </span>
+            </summary>
+            <p class="text-muted-foreground text-sm leading-relaxed mt-4">
+              {item.a}
+            </p>
+          </details>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>

@@ -3,12 +3,17 @@
 @theme {
   --color-primary: #ff5d01;
   --color-primary-foreground: #ffffff;
-  --color-secondary: #0a0a0a;
+  --color-secondary: #f4f4f5;
   --color-accent: #ff8a3d;
-  --color-background: #000000;
-  --color-foreground: #ffffff;
-  --color-muted: #18181b;
-  --color-muted-foreground: #a1a1aa;
+  --color-background: #ffffff;
+  --color-foreground: #0a0a0a;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #52525b;
+  --font-serif: "Playfair Display", Georgia, serif;
+  /* Scoped to the "Complete Lending Cycle" section's own typographic spec —
+     the rest of the site uses the Inter/Playfair pairing above. */
+  --font-heading-alt: "General Sans", "Inter", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
 
 @layer base {
@@ -21,13 +26,13 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(10, 10, 10, 0.03);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(10, 10, 10, 0.08);
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #ffffff, #ff5d01);
+  background: linear-gradient(to right, #0a0a0a, #ff5d01);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

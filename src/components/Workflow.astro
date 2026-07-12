@@ -1,67 +1,409 @@
 ---
+// "Complete Lending Cycle" — premium interactive timeline.
+// Tech note: this is an Astro project, not Next.js (no React/Next.js
+// integration exists here) — built with Astro + TailwindCSS + GSAP +
+// native IntersectionObserver instead, per the other explicitly-requested
+// technologies. Content (steps, titles, descriptions, numbers) is
+// unchanged from the previous version, only the presentation is new.
+import { Network, ClipboardList, Vault, ArrowLeftRight, TrendingUp, CircleCheckBig } from '@lucide/astro';
+import JellyFish from './JellyFish.astro';
+
 const steps = [
   {
     num: "01",
     title: "Market Deployment",
-    description: "Borrowers deploy independent markets via the Factory, setting collateral ratios and thresholds."
+    description: "Borrowers deploy independent markets via the Factory, setting collateral ratios and thresholds.",
+    icon: Network,
   },
   {
     num: "02",
     title: "Offer Submission",
-    description: "Lenders provide liquidity by submitting competitive offers setting custom terms, durations, and APR limits."
+    description: "Lenders provide liquidity by submitting competitive offers setting custom terms, durations, and APR limits.",
+    icon: ClipboardList,
   },
   {
     num: "03",
     title: "Collateral Escrow",
-    description: "Borrowers seamlessly deposit oracle-monitored collateral into isolated vault contracts."
+    description: "Borrowers seamlessly deposit oracle-monitored collateral into isolated vault contracts.",
+    icon: Vault,
   },
   {
     num: "04",
     title: "Matching & Borrowing",
-    description: "The protocol matches borrower requests favoring the lowest-rate, highest-seniority lending offers automatically."
+    description: "The protocol matches borrower requests favoring the lowest-rate, highest-seniority lending offers automatically.",
+    icon: ArrowLeftRight,
   },
   {
     num: "05",
     title: "Interest Accrual",
-    description: "Continuous synchronization compounding interest relative to specific borrowed volumes over elapsed durations."
+    description: "Continuous synchronization compounding interest relative to specific borrowed volumes over elapsed durations.",
+    icon: TrendingUp,
   },
   {
     num: "06",
     title: "Repayment & Liquidity Queue",
-    description: "Repayments augment borrower credibility. Lenders reclaim positions via 7-day Epoch distributions."
-  }
+    description: "Repayments augment borrower credibility. Lenders reclaim positions via 7-day Epoch distributions.",
+    icon: CircleCheckBig,
+  },
 ];
+
+const modules = ["Factory", "OfferBook", "Escrow", "Liquidator", "Reputation"];
 ---
 
-<section id="workflow" class="py-24 bg-muted/30">
+<section id="workflow" class="relative py-28 overflow-hidden bg-white">
+  <!-- Background: barely-visible noise + grid + two soft radial blobs. -->
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 opacity-[0.03] [background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E')]"></div>
+    <div
+      class="absolute inset-0 opacity-[0.035]"
+      style="background-image: linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px); background-size: 56px 56px;"
+    ></div>
+    <div class="absolute top-1/4 -left-32 w-[500px] h-[500px] bg-primary/[0.04] blur-[140px] rounded-full"></div>
+    <div class="absolute bottom-0 right-0 w-[420px] h-[420px] bg-primary/[0.03] blur-[130px] rounded-full"></div>
+  </div>
+
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex flex-col lg:flex-row gap-16">
-      <div class="lg:w-1/3">
-        <h2 class="text-4xl md:text-5xl font-bold mb-6">
-          Complete <br />
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-16 lg:gap-12">
+
+      <!-- LEFT: badge, heading, description, jellyfish, glass module card -->
+      <div class="lg:col-span-2" data-wf-left>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6" data-wf-fade>
+          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          Lifecycle
+        </div>
+
+        <h2 class="font-heading-alt text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] mb-6 text-foreground" data-wf-fade>
+          Complete<br />
           <span class="text-primary">Lending Cycle</span>
         </h2>
-        <p class="text-muted-foreground text-lg mb-8">
+
+        <p class="text-muted-foreground text-lg leading-relaxed mb-10 max-w-md" data-wf-fade>
           A deterministic flow executing capital deployment from market creation to final withdrawal logic.
         </p>
-        
-        <div class="glass p-6 rounded-2xl border-l-4 border-primary">
-          <div class="font-bold text-primary mb-1 uppercase tracking-wider text-sm">Modular System</div>
-          <p class="text-sm text-muted-foreground">BUILT FOR EXTENSIBILITY</p>
+
+        <div class="flex justify-center lg:justify-start mb-10" data-wf-fade>
+          <JellyFish width={280} height={264} />
+        </div>
+
+        <!-- Premium glass module card -->
+        <div class="glass rounded-2xl p-6" data-wf-fade>
+          <div class="text-primary font-bold text-xs uppercase tracking-widest mb-1">Modular System</div>
+          <p class="text-muted-foreground text-sm mb-5">Built for extensibility</p>
+          <ul class="flex flex-col gap-2.5">
+            {modules.map((m) => (
+              <li class="flex items-center gap-2.5 text-sm font-medium text-foreground/80 opacity-0" data-wf-module>
+                <span class="w-1 h-1 rounded-full bg-primary"></span>
+                {m}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      <div class="lg:w-2/3 grid gap-4">
-        {steps.map((step) => (
-          <div class="glass p-6 rounded-xl flex items-center gap-8 group hover:bg-white/10 transition-colors">
-            <span class="text-3xl font-black text-white/10 group-hover:text-primary/40 transition-colors">{step.num}</span>
-            <div>
-              <h3 class="text-lg font-bold mb-1">{step.title}</h3>
-              <p class="text-muted-foreground text-sm">{step.description}</p>
+      <!-- RIGHT: connector timeline -->
+      <div class="lg:col-span-3 relative" data-wf-timeline>
+        <!-- Base connector line -->
+        <div class="absolute left-[27px] top-2 bottom-2 w-[2px] bg-black/10" aria-hidden="true"></div>
+        <!-- Orange fill line, grows downward as steps activate -->
+        <div class="absolute left-[27px] top-2 w-[2px] bg-primary origin-top scale-y-0" data-wf-connector aria-hidden="true"></div>
+        <!-- Flow particles traveling down the line -->
+        <div class="absolute left-[27px] top-2 bottom-2 w-[2px] pointer-events-none" aria-hidden="true">
+          <span class="wf-particle absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/70"></span>
+          <span class="wf-particle absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/70"></span>
+          <span class="wf-particle absolute left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary/70"></span>
+        </div>
+
+        <div class="flex flex-col gap-5">
+          {steps.map((step, i) => (
+            <div
+              class="wf-card relative pl-16 opacity-0"
+              data-wf-card
+              data-index={i}
+            >
+              <!-- Progress dot on the connector -->
+              <span class="wf-dot absolute left-[21px] top-9 w-3.5 h-3.5 rounded-full bg-white border-2 border-black/15 scale-75 transition-colors duration-300" aria-hidden="true"></span>
+
+              <div class="wf-card-surface relative overflow-hidden rounded-2xl border border-black/5 bg-secondary/60 border-l-4 border-l-black/10 p-6 sm:p-7 transition-[background-color,border-color,box-shadow] duration-300 hover:shadow-xl hover:shadow-black/10">
+                <!-- Hover light sweep -->
+                <div class="wf-sweep pointer-events-none absolute inset-0 -translate-x-full"></div>
+
+                <div class="relative flex items-start gap-5">
+                  <span class="wf-number font-mono text-3xl font-semibold text-black/15 shrink-0 tabular-nums transition-colors duration-500" data-wf-number data-target={step.num}>
+                    {step.num}
+                  </span>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2.5 mb-1.5">
+                      <h3 class="text-lg font-bold text-foreground">{step.title}</h3>
+                      <step.icon class="wf-icon w-4 h-4 text-primary/70 shrink-0 transition-transform duration-300" />
+                    </div>
+                    <p class="text-muted-foreground text-sm leading-relaxed">{step.description}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+	/* Static structural styles that aren't reasonable as Tailwind utility
+	   soup (kept minimal — everything animatable is handled by GSAP in the
+	   script below, nothing here is a per-instance inline style). */
+	.wf-card.is-active .wf-card-surface {
+		border-left-color: var(--color-primary);
+		background-color: rgba(255, 93, 1, 0.04);
+	}
+	.wf-card.is-active .wf-number {
+		color: var(--color-primary);
+	}
+	.wf-card.is-active .wf-dot {
+		background-color: var(--color-primary);
+		border-color: var(--color-primary);
+	}
+	.wf-sweep {
+		background: linear-gradient(115deg, transparent 30%, rgba(255, 93, 1, 0.08) 50%, transparent 70%);
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	// ---- Tunables ----
+	const REVEAL_Y_PX = 40;
+	const REVEAL_DURATION_S = 0.8;
+	const REVEAL_STAGGER_S = 0.15;
+	const REVEAL_EASE = 'power3.out';
+	const ACTIVE_SCALE = 1.02;
+	const HOVER_LIFT_PX = 6;
+	const HOVER_DURATION_S = 0.25;
+	const DOT_ACTIVE_SCALE = 1;
+	const NUMBER_COUNT_DURATION_S = 0.5;
+	const PARTICLE_DURATION_S = 3.5;
+	const PARTICLE_STAGGER_S = 1.1;
+	// Fires when a card's top has crossed this far down the viewport —
+	// mirrors the trigger line used by the navbar's section tracking.
+	const ACTIVE_TRIGGER_VIEWPORT_FRACTION = 0.7;
+
+	function initWorkflow(section: HTMLElement) {
+		const cards = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-card]'));
+		const connector = section.querySelector<HTMLElement>('[data-wf-connector]');
+		const leftFadeEls = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-fade]'));
+		const moduleItems = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-module]'));
+		const particles = Array.from(section.querySelectorAll<HTMLElement>('.wf-particle'));
+		const timelineElMaybe = section.querySelector<HTMLElement>('[data-wf-timeline]');
+		if (cards.length === 0 || !connector || !timelineElMaybe) return;
+		// Re-bound to a definitely-non-null const so closures defined below
+		// (measureConnector, updateActive) keep the narrowed type — TS can't
+		// carry the `!timelineElMaybe` guard's narrowing into functions that
+		// are invoked later via event listeners.
+		const timelineEl: HTMLElement = timelineElMaybe;
+
+		// ---- Entrance: left column fades in once, staggered ----
+		gsap.set(leftFadeEls, { y: 24, opacity: 0 });
+		const leftObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					gsap.to(leftFadeEls, {
+						y: 0,
+						opacity: 1,
+						duration: REVEAL_DURATION_S,
+						ease: REVEAL_EASE,
+						stagger: REVEAL_STAGGER_S,
+					});
+					leftObserver.disconnect();
+				});
+			},
+			{ threshold: 0.2 }
+		);
+		const leftColumn = section.querySelector<HTMLElement>('[data-wf-left]');
+		if (leftColumn) leftObserver.observe(leftColumn);
+
+		// ---- Entrance: timeline cards reveal one-by-one on scroll ----
+		gsap.set(cards, { y: REVEAL_Y_PX, opacity: 0 });
+		const revealObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					const target = entry.target as HTMLElement;
+					const index = Number(target.dataset.index ?? 0);
+					gsap.to(target, {
+						y: 0,
+						opacity: 1,
+						duration: REVEAL_DURATION_S,
+						ease: REVEAL_EASE,
+						delay: index * REVEAL_STAGGER_S * 0.3, // gentle extra offset within a batch
+					});
+					revealObserver.unobserve(target);
+				});
+			},
+			{ threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
+		);
+		cards.forEach((card) => revealObserver.observe(card));
+
+		// ---- Module list: fade in once the glass card is in view ----
+		const moduleObserver = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (!entry.isIntersecting) return;
+					gsap.to(moduleItems, {
+						opacity: 1,
+						duration: 0.5,
+						ease: 'power2.out',
+						stagger: 0.08,
+					});
+					moduleObserver.disconnect();
+				});
+			},
+			{ threshold: 0.4 }
+		);
+		if (moduleItems[0]) moduleObserver.observe(moduleItems[0].closest('.glass') ?? moduleItems[0]);
+
+		// ---- Active step tracking: grows the orange connector line and
+		// marks every step up to the current one as active. ----
+		// Performance note: the connector's pixel height is measured and set
+		// ONCE (here, and again on resize) rather than every scroll frame —
+		// per-frame growth is then driven purely by `scaleY`, a compositor
+		// -friendly transform, instead of animating `height` (which would
+		// force layout on every tick).
+		let activeIndex = -1;
+		let connectorHeightPx = 0;
+
+		function measureConnector() {
+			const lastDot = cards[cards.length - 1]?.querySelector<HTMLElement>('.wf-dot');
+			const timelineRect = timelineEl.getBoundingClientRect();
+			const lastDotRect = lastDot?.getBoundingClientRect();
+			if (!lastDotRect) return;
+			connectorHeightPx = lastDotRect.top - timelineRect.top + lastDotRect.height / 2;
+			gsap.set(connector, { height: connectorHeightPx });
+		}
+		measureConnector();
+		window.addEventListener('resize', measureConnector, { passive: true });
+
+		function numberCountUp(card: HTMLElement) {
+			const numberEl = card.querySelector<HTMLElement>('[data-wf-number]');
+			if (!numberEl || numberEl.dataset.counted === 'true') return;
+			numberEl.dataset.counted = 'true';
+			const target = numberEl.dataset.target ?? '01';
+			const targetValue = parseInt(target, 10);
+			const proxy = { value: Math.max(0, targetValue - 1) };
+			gsap.to(proxy, {
+				value: targetValue,
+				duration: NUMBER_COUNT_DURATION_S,
+				ease: 'power1.out',
+				onUpdate: () => {
+					numberEl.textContent = String(Math.round(proxy.value)).padStart(2, '0');
+				},
+				onComplete: () => {
+					numberEl.textContent = target;
+				},
+			});
+		}
+
+		function updateActive() {
+			const triggerY = window.innerHeight * ACTIVE_TRIGGER_VIEWPORT_FRACTION;
+			let newActive = -1;
+			cards.forEach((card, i) => {
+				const rect = card.getBoundingClientRect();
+				if (rect.top <= triggerY) newActive = i;
+			});
+			if (newActive === activeIndex) return;
+			activeIndex = newActive;
+
+			cards.forEach((card, i) => {
+				const isActive = i <= activeIndex;
+				card.classList.toggle('is-active', isActive);
+				const dot = card.querySelector<HTMLElement>('.wf-dot');
+				const surface = card.querySelector<HTMLElement>('.wf-card-surface');
+				if (dot) {
+					gsap.to(dot, { scale: isActive ? DOT_ACTIVE_SCALE : 0.75, duration: 0.3, ease: 'power2.out' });
+				}
+				if (surface) {
+					gsap.to(surface, { scale: isActive ? ACTIVE_SCALE : 1, duration: 0.4, ease: 'power2.out' });
+				}
+				if (isActive) numberCountUp(card);
+			});
+
+			// Grow the orange connector line down to the active card's dot —
+			// pure transform (scaleY against the pre-measured base height),
+			// never touches layout.
+			if (activeIndex >= 0 && connectorHeightPx > 0) {
+				const activeDot = cards[activeIndex].querySelector<HTMLElement>('.wf-dot');
+				const timelineRect = timelineEl.getBoundingClientRect();
+				const dotRect = activeDot?.getBoundingClientRect();
+				if (dotRect) {
+					const targetPx = dotRect.top - timelineRect.top + dotRect.height / 2;
+					gsap.to(connector, {
+						scaleY: targetPx / connectorHeightPx,
+						duration: 0.5,
+						ease: 'power2.out',
+					});
+				}
+			} else {
+				gsap.to(connector, { scaleY: 0, duration: 0.3, ease: 'power2.out' });
+			}
+		}
+
+		let ticking = false;
+		function onScroll() {
+			if (ticking) return;
+			ticking = true;
+			requestAnimationFrame(() => {
+				updateActive();
+				ticking = false;
+			});
+		}
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onScroll, { passive: true });
+		updateActive();
+
+		// ---- Hover: lift, deeper shadow, sweep ----
+		cards.forEach((card) => {
+			const surface = card.querySelector<HTMLElement>('.wf-card-surface');
+			const sweep = card.querySelector<HTMLElement>('.wf-sweep');
+			const icon = card.querySelector<HTMLElement>('.wf-icon');
+			if (!surface) return;
+
+			// Lift/sweep/icon-rotate are GSAP-driven transforms; the shadow
+			// deepening is a plain CSS :hover transition (hover:shadow-xl
+			// above) — both fire together, but the shadow stays off GSAP's
+			// per-frame update loop since it isn't a transform/opacity value.
+			card.addEventListener('mouseenter', () => {
+				gsap.to(surface, { y: -HOVER_LIFT_PX, duration: HOVER_DURATION_S, ease: 'power2.out' });
+				if (sweep) gsap.fromTo(sweep, { x: '-100%' }, { x: '100%', duration: 0.6, ease: 'power2.out' });
+				if (icon) gsap.to(icon, { rotate: 12, duration: HOVER_DURATION_S, ease: 'power2.out' });
+			});
+			card.addEventListener('mouseleave', () => {
+				gsap.to(surface, { y: 0, duration: HOVER_DURATION_S, ease: 'power2.out' });
+				if (icon) gsap.to(icon, { rotate: 0, duration: HOVER_DURATION_S, ease: 'power2.out' });
+			});
+		});
+
+		// ---- Flow particles: subtle dots drifting down the connector ----
+		particles.forEach((particle, i) => {
+			gsap.set(particle, { top: '0%', opacity: 0 });
+			gsap.to(particle, {
+				top: '100%',
+				duration: PARTICLE_DURATION_S,
+				ease: 'power1.inOut',
+				repeat: -1,
+				delay: i * PARTICLE_STAGGER_S,
+				opacity: 1,
+				onRepeat: () => gsap.set(particle, { top: '0%' }),
+			});
+			gsap.to(particle, {
+				opacity: 0.9,
+				duration: PARTICLE_DURATION_S / 2,
+				repeat: -1,
+				yoyo: true,
+				delay: i * PARTICLE_STAGGER_S,
+				ease: 'sine.inOut',
+			});
+		});
+	}
+
+	document.querySelectorAll<HTMLElement>('#workflow').forEach(initWorkflow);
+</script>

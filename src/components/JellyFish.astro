@@ -1,0 +1,502 @@
+---
+// Animates public/jelly-fish.svg exactly as-authored — no redrawing, no CSS
+// recreation. The SVG is a flattened vector trace (1400+ raw <path> elements,
+// zero <g> groups, zero ids/classes), so it's read and inlined verbatim here
+// (via fs, at build time) so GSAP can reach into the DOM at runtime; an
+// <img src="jelly-fish.svg"> can't be animated internally at all — the
+// browser treats it as an opaque raster, JS has no access to its paths.
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+	width?: number;
+	height?: number;
+	class?: string;
+}
+
+const { width = 420, height = 395, class: className = '' } = Astro.props;
+
+const svgPath = path.join(process.cwd(), 'public', 'jelly-fish.svg');
+let svgMarkup = fs.readFileSync(svgPath, 'utf-8');
+
+// The source file only sets pixel width/height on the root <svg>, no
+// viewBox — that pins its rendered size and breaks CSS-driven scaling.
+svgMarkup = svgMarkup.replace(
+	/<svg([^>]*)width="(\d+)"([^>]*)height="(\d+)"([^>]*)>/,
+	(_match: string, a: string, w: string, b: string, h: string, c: string) =>
+		`<svg${a}width="100%"${b}height="100%"${c} viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">`
+);
+
+// The source file's very first path is an opaque corner-to-corner
+// background rectangle (0,0 to full width/height, fill #FDFDFD) — a
+// leftover background plate from the original export, not part of the
+// jellyfish artwork itself. Removing only this one exact path restores a
+// transparent background so the glow hugs the creature's actual silhouette.
+svgMarkup = svgMarkup.replace(
+	/<path d="M0 0 C426\.69 0 853\.38 0 1293 0[^"]*" fill="#FDFDFD" transform="translate\(0,0\)"\/>/,
+	''
+);
+
+const PARTICLE_COUNT = 24;
+---
+
+<!--
+  Layer stack, outermost to innermost — each owns exactly one animation
+  concern so GSAP tweens never fight over the same element/property:
+    jf-hover    magnetic cursor response (damped, eased toward pointer)
+    jf-jitter   occasional micro-imperfection nudge
+    jf-drift    slow continuous horizontal drift
+    jf-float    slow continuous vertical float
+    jf-rotate   slow continuous tilt
+    jf-pulse    bell breathing (scaleX/scaleY)
+    jf-glow     the SVG itself + breathing drop-shadow
+-->
+<div class:list={["jf-stage", className]} style={`width:${width}px; height:${height}px;`} data-jellyfish>
+	<div class="jf-particles" aria-hidden="true">
+		{Array.from({ length: PARTICLE_COUNT }).map(() => (
+			<span class="jf-particle" />
+		))}
+	</div>
+	<div class="jf-hover">
+		<div class="jf-jitter">
+			<div class="jf-drift">
+				<div class="jf-float">
+					<div class="jf-rotate">
+						<div class="jf-pulse">
+							<div class="jf-glow" set:html={svgMarkup} />
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.jf-stage {
+		position: relative;
+		display: block;
+	}
+	.jf-hover,
+	.jf-jitter,
+	.jf-drift,
+	.jf-float,
+	.jf-rotate,
+	.jf-pulse {
+		width: 100%;
+		height: 100%;
+		will-change: transform;
+	}
+	.jf-glow {
+		width: 100%;
+		height: 100%;
+	}
+	.jf-glow :global(svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+	.jf-particles {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		overflow: visible;
+	}
+	.jf-particle {
+		position: absolute;
+		border-radius: 9999px;
+		background: var(--color-primary, #ff5d01);
+		will-change: transform, opacity;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	// ============================================================
+	// Layer A/B/C — continuous floating, drifting, rotation.
+	// Deliberately different periods so the three never fall back into
+	// sync with each other; there is no moment where the body is still.
+	// ============================================================
+	const FLOAT_Y_PX = 18;
+	const FLOAT_DURATION_S = 8; // spec range 7-9s
+	const DRIFT_X_PX = 8;
+	const DRIFT_DURATION_S = 12; // spec range 11-13s
+	const ROTATE_DEG = 2;
+	const ROTATE_DURATION_S = 10;
+
+	// ============================================================
+	// Bell pulsation — continuous breathing (no pause between cycles),
+	// this is what should read as the creature "propelling" itself.
+	// ============================================================
+	const PULSE_SCALE_Y = 0.94;
+	const PULSE_SCALE_X = 1.04;
+	const PULSE_DURATION_S = 3.2; // spec range 2.8-3.5s, full contract+release
+
+	// ============================================================
+	// Tentacle physics — the SVG has no groups/ids distinguishing
+	// individual tentacles (1400+ flat, unlabeled paths), so true
+	// per-tentacle detection isn't possible. Approximated instead by
+	// clustering the lower-region paths into independent x-position
+	// "strands", each with its own randomized duration/delay/amplitude
+	// so no two strands move identically.
+	// ============================================================
+	const TENTACLE_REGION_Y_FRACTION = 0.6;
+	const STRAND_COUNT = 10;
+	const STRAND_DURATION_MIN_S = 2.4;
+	const STRAND_DURATION_MAX_S = 4.6;
+	const STRAND_DELAY_MAX_S = 1.2;
+	const STRAND_ROTATE_MIN_DEG = 1.5;
+	const STRAND_ROTATE_MAX_DEG = 4;
+	const STRAND_SKEW_MIN_DEG = 1;
+	const STRAND_SKEW_MAX_DEG = 3;
+	const STRAND_SCALE_Y_MAX = 1.02;
+	// Body-drives-tentacle lag: tentacles only start reacting once the
+	// body's own motion is already underway, never simultaneously.
+	const TENTACLE_BASE_LAG_S = 0.4;
+
+	// ============================================================
+	// Micro jitter — real organisms are never perfectly still even at rest.
+	// ============================================================
+	const JITTER_MIN_INTERVAL_S = 4;
+	const JITTER_MAX_INTERVAL_S = 7;
+	const JITTER_ROTATE_DEG = 0.4;
+	const JITTER_TRANSLATE_PX = 2;
+	const JITTER_DURATION_S = 0.9;
+
+	// ============================================================
+	// Glow — breathes in step with the bell rhythm rather than on its
+	// own independent timer.
+	// ============================================================
+	const GLOW_NEAR_PX = 12;
+	const GLOW_FAR_PX = 24;
+	const GLOW_MIN_ALPHA = 0.15;
+	const GLOW_MAX_ALPHA = 0.28;
+
+	// ============================================================
+	// Magnetic cursor — an invisible current, not a direct follow.
+	// Heavy damping: slow to approach, even slower to drift back.
+	// ============================================================
+	const HOVER_MAX_TRANSLATE_PX = 12;
+	const HOVER_MAX_ROTATE_DEG = 3;
+	const HOVER_INFLUENCE_RADIUS_PX = 280;
+	const HOVER_APPROACH_DURATION_S = 1.4;
+	const HOVER_RELEASE_DURATION_S = 2.2;
+	// Tentacles sway opposite the cursor direction, more than the body does.
+	const TENTACLE_HOVER_COUNTER_FACTOR = -0.4;
+	const TENTACLE_HOVER_DURATION_S = 1.6;
+
+	// Note on "parallax" (body 100% / bell 95% / inner-body 105% /
+	// tentacles 120%): as literally specified this is a 4-tier depth
+	// system, but the source SVG only cleanly separates into head-region
+	// vs tentacle-region (1400+ flat, unlabeled paths — no distinct "bell"
+	// vs "inner body" grouping exists to target). It also directly
+	// conflicts with the tentacle-cursor-response spec just above (sway
+	// *opposite* the cursor vs. overshoot *further along* the same
+	// direction can't both be the tentacles' hover offset at once). The
+	// "tentacles move more than the body" intent is honored instead
+	// through STRAND_ROTATE/SKEW's independently larger, always-running
+	// amplitude ranges below — genuinely more tentacle motion at all
+	// times — rather than faking a fourth depth layer that isn't there.
+
+	// ============================================================
+	// Pixel shimmer — since this is pixel/dot art, occasional random dots
+	// flicker slightly brighter, so the sprite never reads as a frozen bitmap.
+	// ============================================================
+	const SHIMMER_MIN_INTERVAL_S = 6;
+	const SHIMMER_MAX_INTERVAL_S = 8;
+	const SHIMMER_PATH_COUNT = 14;
+	const SHIMMER_DURATION_S = 0.5;
+
+	// ============================================================
+	// Particles — ambient underwater dust drifting around the creature.
+	// ============================================================
+	const PARTICLE_DRIFT_MIN_PX = 14;
+	const PARTICLE_DRIFT_MAX_PX = 40;
+	const PARTICLE_DURATION_MIN_S = 6;
+	const PARTICLE_DURATION_MAX_S = 14;
+	const PARTICLE_SIZE_MIN_PX = 1.5;
+	const PARTICLE_SIZE_MAX_PX = 4;
+
+	function random(min: number, max: number) {
+		return Math.random() * (max - min) + min;
+	}
+
+	function setupJellyfish(stage: HTMLElement) {
+		const hoverLayer = stage.querySelector<HTMLElement>('.jf-hover');
+		const jitterLayer = stage.querySelector<HTMLElement>('.jf-jitter');
+		const driftLayer = stage.querySelector<HTMLElement>('.jf-drift');
+		const floatLayer = stage.querySelector<HTMLElement>('.jf-float');
+		const rotateLayer = stage.querySelector<HTMLElement>('.jf-rotate');
+		const pulseLayer = stage.querySelector<HTMLElement>('.jf-pulse');
+		const glowLayer = stage.querySelector<HTMLElement>('.jf-glow');
+		const svgEl = stage.querySelector<SVGSVGElement>('svg');
+		const particles = Array.from(stage.querySelectorAll<HTMLElement>('.jf-particle'));
+		if (!hoverLayer || !jitterLayer || !driftLayer || !floatLayer || !rotateLayer || !pulseLayer || !glowLayer || !svgEl) {
+			return;
+		}
+
+		gsap.set(
+			[hoverLayer, jitterLayer, driftLayer, floatLayer, rotateLayer, pulseLayer],
+			{ transformOrigin: '50% 50%' }
+		);
+
+		// ---- Layer A: vertical float ----
+		gsap.to(floatLayer, {
+			y: -FLOAT_Y_PX,
+			duration: FLOAT_DURATION_S,
+			ease: 'sine.inOut',
+			repeat: -1,
+			yoyo: true,
+		});
+
+		// ---- Layer B: horizontal drift ----
+		gsap.to(driftLayer, {
+			x: DRIFT_X_PX,
+			duration: DRIFT_DURATION_S,
+			ease: 'sine.inOut',
+			repeat: -1,
+			yoyo: true,
+		});
+
+		// ---- Layer C: slow rotation ----
+		gsap.fromTo(
+			rotateLayer,
+			{ rotation: -ROTATE_DEG },
+			{ rotation: ROTATE_DEG, duration: ROTATE_DURATION_S, ease: 'sine.inOut', repeat: -1, yoyo: true }
+		);
+
+		// ---- Bell pulsation: continuous breathing, sine easing, never bouncy ----
+		gsap.to(pulseLayer, {
+			scaleY: PULSE_SCALE_Y,
+			scaleX: PULSE_SCALE_X,
+			duration: PULSE_DURATION_S / 2,
+			ease: 'sine.inOut',
+			repeat: -1,
+			yoyo: true,
+		});
+
+		// ---- Glow: breathes on the same rhythm as the bell ----
+		const glowState = { t: 0 };
+		gsap.to(glowState, {
+			t: 1,
+			duration: PULSE_DURATION_S / 2,
+			ease: 'sine.inOut',
+			repeat: -1,
+			yoyo: true,
+			onUpdate: () => {
+				const alpha = GLOW_MIN_ALPHA + (GLOW_MAX_ALPHA - GLOW_MIN_ALPHA) * glowState.t;
+				glowLayer.style.filter =
+					`drop-shadow(0 0 ${GLOW_NEAR_PX}px rgba(255,110,20,${alpha})) ` +
+					`drop-shadow(0 0 ${GLOW_FAR_PX}px rgba(255,110,20,${alpha * 0.6}))`;
+			},
+		});
+
+		// ---- Micro jitter: tiny, infrequent, randomly-timed imperfection ----
+		function scheduleJitter() {
+			const delay = random(JITTER_MIN_INTERVAL_S, JITTER_MAX_INTERVAL_S);
+			gsap.delayedCall(delay, () => {
+				gsap.to(jitterLayer, {
+					rotation: random(-JITTER_ROTATE_DEG, JITTER_ROTATE_DEG),
+					x: random(-JITTER_TRANSLATE_PX, JITTER_TRANSLATE_PX),
+					y: random(-JITTER_TRANSLATE_PX, JITTER_TRANSLATE_PX),
+					duration: JITTER_DURATION_S,
+					ease: 'sine.inOut',
+					yoyo: true,
+					repeat: 1,
+				});
+				scheduleJitter();
+			});
+		}
+		scheduleJitter();
+
+		// ---- Path selection: head-region vs tentacle-region, clustered
+		// into independent "strands" by horizontal position ----
+		const allPaths = Array.from(svgEl.querySelectorAll<SVGPathElement>('path'));
+		const viewBox = svgEl.viewBox.baseVal;
+		const thresholdY = viewBox.height * TENTACLE_REGION_Y_FRACTION;
+
+		function pathTranslate(p: SVGPathElement): { x: number; y: number } | null {
+			const transform = p.getAttribute('transform') || '';
+			const match = transform.match(/translate\(([\d.-]+),\s*([\d.-]+)\)/);
+			if (!match) return null;
+			return { x: parseFloat(match[1]), y: parseFloat(match[2]) };
+		}
+
+		const tentaclePaths: { el: SVGPathElement; x: number }[] = [];
+		for (const p of allPaths) {
+			const t = pathTranslate(p);
+			if (!t) continue;
+			if (t.y >= thresholdY) tentaclePaths.push({ el: p, x: t.x });
+		}
+
+		if (tentaclePaths.length > 0) {
+			// Each path needs its OWN pivot point for rotation/skew to look
+			// right. `transform-origin: 50% 0%` combined with
+			// `transform-box: fill-box` was the previous approach, but
+			// fill-box support for SVG children — especially layered under
+			// an existing `transform="translate(...)"` XML attribute, which
+			// every path here has — is inconsistent enough in practice that
+			// it visibly broke: some paths were pivoting around the whole
+			// SVG's origin instead of their own tiny bounding box, so a
+			// small rotation sent them swinging across a huge visible arc.
+			// Computing each path's own bounding box via getBBox() and
+			// setting an explicit pixel transform-origin in that path's own
+			// local coordinate space sidesteps fill-box entirely — pixel
+			// values are unambiguous, no box-model interpretation needed.
+			for (const { el } of tentaclePaths) {
+				try {
+					const bbox = el.getBBox();
+					const originX = bbox.x + bbox.width / 2;
+					const originY = bbox.y;
+					gsap.set(el, { transformOrigin: `${originX}px ${originY}px` });
+				} catch {
+					// getBBox can throw for a path with no renderable geometry
+					// (zero-length data) — leave that one at the CSS default
+					// origin rather than let it block the rest.
+				}
+			}
+
+			// Cluster tentacle paths into independent strands by x-position so
+			// each "tentacle" gets its own duration/delay/amplitude instead of
+			// the whole region moving as one uniform mass.
+			tentaclePaths.sort((a, b) => a.x - b.x);
+			const perStrand = Math.ceil(tentaclePaths.length / STRAND_COUNT);
+			for (let s = 0; s < STRAND_COUNT; s++) {
+				const strandEls = tentaclePaths.slice(s * perStrand, (s + 1) * perStrand).map((t) => t.el);
+				if (strandEls.length === 0) continue;
+
+				const duration = random(STRAND_DURATION_MIN_S, STRAND_DURATION_MAX_S);
+				const delay = TENTACLE_BASE_LAG_S + random(0, STRAND_DELAY_MAX_S);
+				const rotateAmp = random(STRAND_ROTATE_MIN_DEG, STRAND_ROTATE_MAX_DEG);
+				const skewAmp = random(STRAND_SKEW_MIN_DEG, STRAND_SKEW_MAX_DEG);
+				const scaleYAmp = 1 + Math.random() * (STRAND_SCALE_Y_MAX - 1);
+
+				gsap.to(strandEls, {
+					rotation: gsap.utils.random(-rotateAmp, rotateAmp),
+					skewX: gsap.utils.random(-skewAmp, skewAmp),
+					scaleY: scaleYAmp,
+					duration,
+					delay,
+					ease: 'sine.inOut',
+					repeat: -1,
+					yoyo: true,
+					stagger: { each: 0.015, from: 'random' },
+				});
+			}
+		}
+
+		// ---- Pixel shimmer: random dots flicker slightly brighter ----
+		function scheduleShimmer() {
+			const delay = random(SHIMMER_MIN_INTERVAL_S, SHIMMER_MAX_INTERVAL_S);
+			gsap.delayedCall(delay, () => {
+				const sample: SVGPathElement[] = [];
+				for (let i = 0; i < SHIMMER_PATH_COUNT; i++) {
+					const candidate = allPaths[Math.floor(Math.random() * allPaths.length)];
+					if (candidate) sample.push(candidate);
+				}
+				gsap.fromTo(
+					sample,
+					{ opacity: 0.75 },
+					{ opacity: 1, duration: SHIMMER_DURATION_S, ease: 'sine.inOut', stagger: 0.03 }
+				);
+				scheduleShimmer();
+			});
+		}
+		scheduleShimmer();
+
+		// ---- Particles: ambient drifting dust around the creature ----
+		particles.forEach((particle) => {
+			const size = random(PARTICLE_SIZE_MIN_PX, PARTICLE_SIZE_MAX_PX);
+			const startXPct = random(5, 95);
+			const startYPct = random(5, 95);
+			gsap.set(particle, {
+				width: size,
+				height: size,
+				left: `${startXPct}%`,
+				top: `${startYPct}%`,
+				opacity: random(0.15, 0.55),
+			});
+
+			function driftParticle() {
+				const dx = random(-PARTICLE_DRIFT_MAX_PX, PARTICLE_DRIFT_MAX_PX);
+				const dy = -random(PARTICLE_DRIFT_MIN_PX, PARTICLE_DRIFT_MAX_PX); // gentle upward bias, like rising dust
+				const duration = random(PARTICLE_DURATION_MIN_S, PARTICLE_DURATION_MAX_S);
+				gsap.to(particle, {
+					x: dx,
+					y: dy,
+					rotation: random(-15, 15),
+					opacity: random(0.1, 0.5),
+					duration,
+					ease: 'sine.inOut',
+					onComplete: driftParticle,
+				});
+			}
+			driftParticle();
+		});
+
+		// ---- Magnetic cursor: damped approach/release, with tentacles
+		// countering opposite the body and overshooting it (parallax) ----
+		function handlePointerMove(e: PointerEvent) {
+			const rect = stage.getBoundingClientRect();
+			const centerX = rect.left + rect.width / 2;
+			const centerY = rect.top + rect.height / 2;
+			const dx = e.clientX - centerX;
+			const dy = e.clientY - centerY;
+			const distance = Math.hypot(dx, dy);
+
+			if (distance > HOVER_INFLUENCE_RADIUS_PX) {
+				releaseCursor();
+				return;
+			}
+
+			const influence = 1 - distance / HOVER_INFLUENCE_RADIUS_PX;
+			const normX = dx / (distance || 1);
+			const normY = dy / (distance || 1);
+			const tx = normX * HOVER_MAX_TRANSLATE_PX * influence;
+			const ty = normY * HOVER_MAX_TRANSLATE_PX * influence;
+			const rot = normX * HOVER_MAX_ROTATE_DEG * influence;
+
+			gsap.to(hoverLayer, {
+				x: tx,
+				y: ty,
+				rotation: rot,
+				duration: HOVER_APPROACH_DURATION_S,
+				ease: 'power2.inOut',
+			});
+
+			if (tentaclePaths.length > 0) {
+				gsap.to(
+					tentaclePaths.map((t) => t.el),
+					{
+						x: tx * TENTACLE_HOVER_COUNTER_FACTOR,
+						duration: TENTACLE_HOVER_DURATION_S,
+						ease: 'sine.inOut',
+						overwrite: 'auto',
+					}
+				);
+			}
+		}
+
+		function releaseCursor() {
+			gsap.to(hoverLayer, {
+				x: 0,
+				y: 0,
+				rotation: 0,
+				duration: HOVER_RELEASE_DURATION_S,
+				ease: 'power1.inOut',
+			});
+			if (tentaclePaths.length > 0) {
+				gsap.to(
+					tentaclePaths.map((t) => t.el),
+					{ x: 0, duration: HOVER_RELEASE_DURATION_S, ease: 'power1.inOut', overwrite: 'auto' }
+				);
+			}
+		}
+
+		window.addEventListener('pointermove', handlePointerMove, { passive: true });
+		window.addEventListener('pointerleave', releaseCursor, { passive: true });
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-jellyfish]').forEach(setupJellyfish);
+</script>

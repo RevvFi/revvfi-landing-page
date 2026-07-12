@@ -1,0 +1,157 @@
+---
+// A small "flow diagram" illustration: N icon nodes connected by lines that
+// draw themselves on, with a subtle pulse that continues traveling along the
+// path afterward. Deliberately does NOT self-trigger on scroll — it exposes
+// a paused, ready-to-play timeline (via `container.__flowPlay`) so the
+// parent section can orchestrate exactly when each illustration builds,
+// keeping the whole section's entrance sequenced rather than simultaneous.
+import { Icon } from 'astro-icon/components';
+
+interface Step {
+	icon: string;
+	label: string;
+}
+
+interface Props {
+	steps: Step[];
+	class?: string;
+	size?: 'sm' | 'lg';
+}
+
+const { steps, class: className = '', size = 'sm' } = Astro.props;
+const badgeSize = size === 'lg' ? 'w-14 h-14' : 'w-10 h-10';
+const iconSize = size === 'lg' ? 28 : 20;
+---
+
+<div class:list={["flow-illustration relative", className]} data-flow>
+	<svg class="absolute inset-0 w-full h-full pointer-events-none" data-flow-svg aria-hidden="true"></svg>
+	<div class="relative flex items-start justify-between">
+		{steps.map((step) => (
+			<div class="flow-node flex flex-col items-center gap-2 opacity-0" data-flow-node>
+				<div class={`flow-badge ${badgeSize} rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary`}>
+					<Icon name={step.icon} width={iconSize} height={iconSize} />
+				</div>
+				<span class="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground text-center leading-tight max-w-[64px]">
+					{step.label}
+				</span>
+			</div>
+		))}
+	</div>
+</div>
+
+<style>
+	.flow-badge {
+		will-change: transform;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	const LINE_DRAW_DURATION_S = 0.6;
+	const LINE_DRAW_STAGGER_S = 0.2;
+	const NODE_FADE_DURATION_S = 0.4;
+	const PULSE_RADIUS_PX = 3;
+	const PULSE_DURATION_S = 1.6;
+	const PULSE_GAP_S = 0.4;
+
+	function setupFlow(container: HTMLElement) {
+		const svg = container.querySelector<SVGSVGElement>('[data-flow-svg]');
+		const nodes = Array.from(container.querySelectorAll<HTMLElement>('[data-flow-node]'));
+		if (!svg || nodes.length < 2) return;
+
+		function layout() {
+			svg!.innerHTML = '';
+			const containerRect = container.getBoundingClientRect();
+			const centers = nodes.map((node) => {
+				const badge = node.querySelector<HTMLElement>('.flow-badge')!;
+				const r = badge.getBoundingClientRect();
+				return {
+					x: r.left + r.width / 2 - containerRect.left,
+					y: r.top + r.height / 2 - containerRect.top,
+				};
+			});
+
+			const svgNS = 'http://www.w3.org/2000/svg';
+			const lines: SVGLineElement[] = [];
+			for (let i = 0; i < centers.length - 1; i++) {
+				const line = document.createElementNS(svgNS, 'line');
+				line.setAttribute('x1', String(centers[i].x));
+				line.setAttribute('y1', String(centers[i].y));
+				line.setAttribute('x2', String(centers[i + 1].x));
+				line.setAttribute('y2', String(centers[i + 1].y));
+				line.setAttribute('stroke', 'currentColor');
+				line.setAttribute('stroke-width', '1.5');
+				line.setAttribute('class', 'text-primary/25');
+				line.setAttribute('stroke-dasharray', '4 4');
+				svg!.appendChild(line);
+				lines.push(line);
+			}
+
+			const pulse = document.createElementNS(svgNS, 'circle');
+			pulse.setAttribute('r', String(PULSE_RADIUS_PX));
+			pulse.setAttribute('class', 'text-primary');
+			pulse.setAttribute('fill', 'currentColor');
+			pulse.setAttribute('opacity', '0');
+			svg!.appendChild(pulse);
+
+			return { centers, lines, pulse };
+		}
+
+		let { centers, lines, pulse } = layout();
+		gsap.set(nodes, { y: 10 });
+
+		// Build timeline, created paused — the parent orchestrator decides
+		// when to call container.__flowPlay().
+		const tl = gsap.timeline({ paused: true });
+
+		lines.forEach((line) => {
+			const x1 = parseFloat(line.getAttribute('x1')!);
+			const y1 = parseFloat(line.getAttribute('y1')!);
+			const x2 = parseFloat(line.getAttribute('x2')!);
+			const y2 = parseFloat(line.getAttribute('y2')!);
+			const dist = Math.hypot(x2 - x1, y2 - y1);
+			gsap.set(line, { strokeDasharray: dist, strokeDashoffset: dist });
+			tl.to(line, { strokeDashoffset: 0, duration: LINE_DRAW_DURATION_S, ease: 'power1.inOut' }, `<+=${LINE_DRAW_STAGGER_S}`);
+		});
+
+		nodes.forEach((node, i) => {
+			tl.to(
+				node,
+				{ opacity: 1, y: 0, duration: NODE_FADE_DURATION_S, ease: 'sine.inOut' },
+				i === 0 ? 0 : `<+=${LINE_DRAW_STAGGER_S * 0.3}`
+			);
+		});
+
+		// After the build, a small pulse continuously travels node-to-node —
+		// ambient motion, not a one-shot reveal.
+		function loopPulse() {
+			if (centers.length < 2) return;
+			const path = gsap.timeline({ repeat: -1, repeatDelay: PULSE_GAP_S });
+			path.set(pulse, { attr: { cx: centers[0].x, cy: centers[0].y }, opacity: 1 });
+			for (let i = 1; i < centers.length; i++) {
+				path.to(pulse, {
+					attr: { cx: centers[i].x, cy: centers[i].y },
+					duration: PULSE_DURATION_S / (centers.length - 1),
+					ease: 'sine.inOut',
+				});
+			}
+			path.to(pulse, { opacity: 0, duration: 0.3 });
+			return path;
+		}
+
+		let pulseTimeline: gsap.core.Timeline | undefined;
+		tl.call(() => {
+			pulseTimeline = loopPulse();
+		});
+
+		window.addEventListener('resize', () => {
+			pulseTimeline?.kill();
+			({ centers, lines, pulse } = layout());
+		});
+
+		(container as HTMLElement & { __flowPlay?: () => void }).__flowPlay = () => tl.play();
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-flow]').forEach(setupFlow);
+</script>

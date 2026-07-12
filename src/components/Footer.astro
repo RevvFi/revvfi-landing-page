@@ -1,9 +1,34 @@
 ---
-import { X, Disc as Discord } from '@lucide/astro';
+import { X, Disc as Discord, ArrowUpRight } from '@lucide/astro';
 ---
 
-<footer class="bg-black pt-24 pb-12 border-t border-white/5">
+<footer class="bg-white pt-24 pb-12 border-t border-black/5">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- CTA banner: dark card with subtle grid texture, matching the reference -->
+    <div class="relative overflow-hidden rounded-3xl bg-black px-8 py-16 sm:px-16 sm:py-20 mb-20 text-center">
+      <!-- Subtle grid pattern -->
+      <div
+        class="absolute inset-0 opacity-[0.07]"
+        style="background-image: linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px); background-size: 64px 64px;"
+      ></div>
+      <div class="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60"></div>
+
+      <h2 class="relative font-serif text-3xl sm:text-5xl font-medium tracking-tight text-white leading-tight max-w-3xl mx-auto">
+        Start lending or borrowing
+        <a
+          href="http://app.revvfi.xyz/"
+          class="inline-flex items-center gap-2 align-middle mx-2 bg-white hover:bg-white/90 text-black pl-5 py-1.5 pr-1.5 rounded-full text-xl sm:text-2xl font-sans font-bold transition-all"
+        >
+          Launch App
+          <span class="bg-primary rounded-full p-2 flex items-center justify-center">
+            <ArrowUpRight class="w-4 h-4 text-white" />
+          </span>
+        </a>
+        in minutes
+      </h2>
+    </div>
+
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8 mb-16">
       <div class="col-span-2 lg:col-span-2">
         <div class="flex items-center gap-2 mb-6">
@@ -13,6 +38,15 @@ import { X, Disc as Discord } from '@lucide/astro';
         <p class="text-muted-foreground max-w-xs mb-8">
           Level Up Your Trading Experience with institutional grade liquidity infrastructure.
         </p>
+        <a
+          href="http://app.revvfi.xyz/"
+          class="inline-flex items-center gap-2 bg-black hover:bg-black/90 text-white pl-5 py-1.5 pr-1.5 rounded-full text-sm font-bold transition-all mb-8"
+        >
+          Get early access
+          <span class="bg-primary rounded-full p-1.5 flex items-center justify-center">
+            <ArrowUpRight class="w-3.5 h-3.5 text-white" />
+          </span>
+        </a>
         <div class="flex gap-4">
           <a href="https://twitter.com/revvfi_xyz" class="w-10 h-10 glass rounded-full flex items-center justify-center hover:text-primary transition-colors">
             <X class="w-5 h-5" />
@@ -31,37 +65,37 @@ import { X, Disc as Discord } from '@lucide/astro';
       <div>
         <h4 class="font-bold mb-6 uppercase text-xs tracking-widest text-muted-foreground">Company</h4>
         <ul class="space-y-4 text-sm">
-          <li><a href="/about" class="text-muted-foreground hover:text-white transition-colors">About</a></li>
-          <li><a href="/team" class="text-muted-foreground hover:text-white transition-colors">Team</a></li>
-          <li><a href="/invest" class="text-muted-foreground hover:text-white transition-colors">Invest</a></li>
-          <li><a href="/contribute" class="text-muted-foreground hover:text-white transition-colors">Contribute</a></li>
+          <li><a href="/about" class="text-muted-foreground hover:text-foreground transition-colors">About</a></li>
+          <li><a href="/team" class="text-muted-foreground hover:text-foreground transition-colors">Team</a></li>
+          <li><a href="/invest" class="text-muted-foreground hover:text-foreground transition-colors">Invest</a></li>
+          <li><a href="/contribute" class="text-muted-foreground hover:text-foreground transition-colors">Contribute</a></li>
         </ul>
       </div>
 
       <div>
         <h4 class="font-bold mb-6 uppercase text-xs tracking-widest text-muted-foreground">Resources</h4>
         <ul class="space-y-4 text-sm">
-          <li><a href="http://docs.revvfi.xyz/" class="text-muted-foreground hover:text-white transition-colors">Documentation</a></li>
-          <li><a href="http://app.revvfi.xyz/" class="text-muted-foreground hover:text-white transition-colors">Launch App</a></li>
-          <li><a href="https://github.com/RevvFi" class="text-muted-foreground hover:text-white transition-colors">GitHub</a></li>
+          <li><a href="http://docs.revvfi.xyz/" class="text-muted-foreground hover:text-foreground transition-colors">Documentation</a></li>
+          <li><a href="http://app.revvfi.xyz/" class="text-muted-foreground hover:text-foreground transition-colors">Launch App</a></li>
+          <li><a href="https://github.com/RevvFi" class="text-muted-foreground hover:text-foreground transition-colors">GitHub</a></li>
         </ul>
       </div>
 
       <div>
         <h4 class="font-bold mb-6 uppercase text-xs tracking-widest text-muted-foreground">Contact</h4>
         <ul class="space-y-4 text-sm">
-          <li><a href="/contact" class="text-muted-foreground hover:text-white transition-colors">Get in Touch</a></li>
-          <li><a href="/terms" class="text-muted-foreground hover:text-white transition-colors">Terms</a></li>
-          <li><a href="/privacy" class="text-muted-foreground hover:text-white transition-colors">Privacy</a></li>
+          <li><a href="/contact" class="text-muted-foreground hover:text-foreground transition-colors">Get in Touch</a></li>
+          <li><a href="/terms" class="text-muted-foreground hover:text-foreground transition-colors">Terms</a></li>
+          <li><a href="/privacy" class="text-muted-foreground hover:text-foreground transition-colors">Privacy</a></li>
         </ul>
       </div>
     </div>
 
-    <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between gap-4 text-xs text-muted-foreground font-medium uppercase tracking-widest">
+    <div class="pt-8 border-t border-black/5 flex flex-col md:flex-row justify-between gap-4 text-xs text-muted-foreground font-medium uppercase tracking-widest">
       <p>© {new Date().getFullYear()} REVVFI PROTOCOL. ALL RIGHTS RESERVED.</p>
       <div class="flex gap-8">
-        <a href="/privacy" class="hover:text-white transition-colors">Privacy Policy</a>
-        <a href="/terms" class="hover:text-white transition-colors">Terms of Service</a>
+        <a href="/privacy" class="hover:text-foreground transition-colors">Privacy Policy</a>
+        <a href="/terms" class="hover:text-foreground transition-colors">Terms of Service</a>
       </div>
     </div>
   </div>
