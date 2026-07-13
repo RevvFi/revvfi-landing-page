@@ -1,53 +1,178 @@
 ---
-import { ShieldAlert } from '@lucide/astro';
+// "Security Advantages" — editorial redesign. No cards, no shield icon, no
+// glass container — the server illustration is the visual focal point, the
+// four protections read as a clean list, and depth comes from layered
+// background treatment + whitespace instead of borders/shadows.
+import { Icon } from 'astro-icon/components';
+import TracedIllustration from './TracedIllustration.astro';
 
-const guarantees = [
-  "No Upgradability on Launch Contracts",
-  "Epoch-Based Withdrawals for Anti-Bank Run",
-  "Chainlink Integration with Stale Price Guard",
-  "Dutch Auction Liquidations for Safe Recovery"
+const protections = [
+  {
+    icon: 'solar:shield-keyhole-linear',
+    title: 'No Upgradability on Launch Contracts',
+    description: "Core contracts ship with no proxy pattern and no admin upgrade path, so the rules can't change under you after a market goes live.",
+  },
+  {
+    icon: 'solar:calendar-mark-linear',
+    title: 'Epoch-Based Withdrawals for Anti-Bank Run',
+    description: 'Withdrawals settle on 7-day epoch cycles, preventing the kind of flash exits that trigger cascading liquidity crises.',
+  },
+  {
+    icon: 'solar:graph-up-linear',
+    title: 'Chainlink Integration with Stale Price Guard',
+    description: "Collateral is priced by Chainlink oracles with a 2-hour staleness guard, rejecting any feed that hasn't updated recently.",
+  },
+  {
+    icon: 'solar:tag-price-linear',
+    title: 'Dutch Auction Liquidations for Safe Recovery',
+    description: 'Defaults resolve through a Dutch auction with configurable price decay, recovering value transparently instead of a forced fire sale.',
+  },
+];
+
+const stats = [
+  { value: '100%', label: 'On-Chain' },
+  { value: 'Zero', label: 'Admin Keys' },
+  { value: 'Chainlink', label: 'Powered' },
 ];
 ---
 
-<section id="safety" class="py-24 relative overflow-hidden bg-white">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="glass rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden border border-black/10 group">
-      <!-- Glow effect -->
-      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] -z-10 group-hover:bg-primary/20 transition-all duration-500"></div>
-      
-      <div class="flex flex-col lg:flex-row items-center justify-between gap-12">
-        <div class="flex flex-col md:flex-row items-center gap-8 text-center md:text-left lg:w-1/2">
-          <div class="relative">
-            <div class="absolute inset-0 bg-primary/40 blur-2xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity"></div>
-            <div class="relative w-24 h-24 rounded-3xl bg-primary/20 flex items-center justify-center border border-primary/30">
-              <ShieldAlert class="w-12 h-12 text-primary" />
+<section id="safety" class="relative py-28 overflow-hidden bg-white">
+  <!-- Layered background: orange blob + white gradient wash + noise + grid + vignette -->
+  <div class="absolute inset-0 -z-10">
+    <div class="absolute inset-0 bg-gradient-to-b from-white via-secondary/40 to-white"></div>
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/[0.07] blur-[130px] rounded-full"></div>
+    <div
+      class="absolute inset-0 opacity-[0.025] [background-image:url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22120%22%20height%3D%22120%22%3E%3Cfilter%20id%3D%22n%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20stitchTiles%3D%22stitch%22%2F%3E%3C%2Ffilter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url(%23n)%22%2F%3E%3C%2Fsvg%3E')]"
+    ></div>
+    <div
+      class="absolute inset-0 opacity-[0.03]"
+      style="background-image: linear-gradient(to right, #000 1px, transparent 1px), linear-gradient(to bottom, #000 1px, transparent 1px); background-size: 64px 64px;"
+    ></div>
+    <div class="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.035)_100%)]"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Top: eyebrow, heading, supporting paragraph -->
+    <div class="text-center max-w-2xl mx-auto mb-20" data-safety-intro>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        Security Advantages
+      </div>
+      <h2 class="font-serif text-4xl md:text-5xl font-semibold tracking-tight mb-5">
+        Built to be trusted <span class="text-primary">by default</span>
+      </h2>
+      <p class="text-muted-foreground text-lg leading-relaxed">
+        Deterministic protocol protections enforced by immutable smart contracts, mitigating risk across every participant.
+      </p>
+    </div>
+
+    <!-- Middle: illustration left, editorial list right -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-20 items-center mb-24">
+      <div class="flex justify-center" data-safety-intro>
+        <TracedIllustration width={340} height={322} glow />
+      </div>
+
+      <div class="flex flex-col divide-y divide-black/[0.06]">
+        {protections.map((p) => (
+          <div class="safety-item group py-6 first:pt-0 last:pb-0 flex items-start gap-5 opacity-0" data-safety-item>
+            <div class="safety-icon shrink-0 w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary transition-transform duration-300">
+              <Icon name={p.icon} width={22} height={22} />
+            </div>
+            <div class="safety-text transition-transform duration-300">
+              <h3 class="text-base font-bold text-foreground mb-1.5">{p.title}</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">{p.description}</p>
             </div>
           </div>
-          
-          <div>
-            <h2 class="font-serif text-3xl md:text-4xl font-semibold mb-4">Security Advantages</h2>
-            <p class="text-muted-foreground text-lg leading-relaxed">
-              Deterministic protocol protections enforced by immutable smart contracts mitigating risk across all participants.
-            </p>
-          </div>
-        </div>
-
-        <!-- Divider for desktop -->
-        <div class="hidden lg:block w-px h-32 bg-black/10"></div>
-        
-        <div class="lg:w-2/5 w-full">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
-            {guarantees.map((item) => (
-              <div class="flex items-center gap-4 group/item">
-                <div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(168,85,247,0.5)]"></div>
-                <span class="text-sm md:text-base font-semibold text-foreground/90 group-hover/item:text-primary transition-colors">
-                  {item}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
+    </div>
+
+    <!-- Bottom: protocol statistics -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-4 max-w-3xl mx-auto pt-16 border-t border-black/[0.06]">
+      {stats.map((s) => (
+        <div class="text-center opacity-0" data-safety-stat>
+          <div class="font-serif text-3xl md:text-4xl font-semibold text-foreground mb-1">{s.value}</div>
+          <div class="text-xs font-bold uppercase tracking-widest text-muted-foreground">{s.label}</div>
+        </div>
+      ))}
     </div>
   </div>
 </section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  const INTRO_DURATION_S = 0.7;
+
+  const LIST_SLIDE_X_PX = 28;
+  const LIST_DURATION_S = 0.6;
+  const LIST_STAGGER_S = 0.1;
+
+  const STAT_Y_PX = 20;
+  const STAT_DURATION_S = 0.6;
+  const STAT_STAGGER_S = 0.12;
+
+  const HOVER_ICON_SCALE = 1.12;
+  const HOVER_TEXT_SHIFT_PX = 2;
+  const HOVER_DURATION_S = 0.25;
+
+  function initSafety(section: HTMLElement) {
+    const introEls = Array.from(section.querySelectorAll<HTMLElement>('[data-safety-intro]'));
+    const items = Array.from(section.querySelectorAll<HTMLElement>('[data-safety-item]'));
+    const statEls = Array.from(section.querySelectorAll<HTMLElement>('[data-safety-stat]'));
+    if (items.length === 0) return;
+
+    gsap.set(introEls, { y: 16 });
+    gsap.set(items, { x: LIST_SLIDE_X_PX });
+    gsap.set(statEls, { y: STAT_Y_PX });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          gsap.to(introEls, { y: 0, opacity: 1, duration: INTRO_DURATION_S, ease: 'power2.inOut', stagger: 0.1 });
+          gsap.to(items, {
+            x: 0,
+            opacity: 1,
+            duration: LIST_DURATION_S,
+            ease: 'power2.inOut',
+            stagger: LIST_STAGGER_S,
+            delay: 0.2,
+          });
+          gsap.to(statEls, {
+            y: 0,
+            opacity: 1,
+            duration: STAT_DURATION_S,
+            ease: 'power2.inOut',
+            stagger: STAT_STAGGER_S,
+            delay: 0.5,
+          });
+
+          observer.disconnect();
+        });
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(section);
+
+    // Hover: icon scales, accent brightens, text shifts — each item animates
+    // independently of the others.
+    items.forEach((item) => {
+      const icon = item.querySelector<HTMLElement>('.safety-icon');
+      const text = item.querySelector<HTMLElement>('.safety-text');
+      if (!icon || !text) return;
+
+      item.addEventListener('mouseenter', () => {
+        gsap.to(icon, { scale: HOVER_ICON_SCALE, backgroundColor: 'rgba(255,93,1,0.18)', duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+        gsap.to(text, { x: HOVER_TEXT_SHIFT_PX, duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+      });
+      item.addEventListener('mouseleave', () => {
+        gsap.to(icon, { scale: 1, backgroundColor: 'rgba(255,93,1,0.1)', duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+        gsap.to(text, { x: 0, duration: HOVER_DURATION_S, ease: 'power2.inOut' });
+      });
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('#safety').forEach(initSafety);
+</script>

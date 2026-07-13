@@ -1,6 +1,17 @@
 ---
 import { Menu, X, ArrowUpRight } from '@lucide/astro';
 
+interface Props {
+	// Static label shown in the collapsed pill on pages that have no
+	// in-page #faq/#why-choose-us/etc. sections to scroll-track (About,
+	// Team, Contribute, Invest, Contact, Terms, Privacy). Defaults to
+	// "Overview" for the homepage, where scroll-based section tracking
+	// takes over instead and this initial value gets replaced immediately.
+	pageLabel?: string;
+}
+
+const { pageLabel = 'Overview' } = Astro.props;
+
 const links = [
 	{ href: '/#faq', label: 'FAQ', section: 'faq' },
 	{ href: '/#why-choose-us', label: 'Why RevvFi', section: 'why-choose-us' },
@@ -10,16 +21,16 @@ const links = [
 	{ href: '/team', label: 'Team' },
 	{ href: 'https://docs.revvfi.xyz/', label: 'Docs' },
 ];
-
 ---
 
 <!-- "Dynamic island" style floating pill navbar: dark, rounded-full, margin from the
-     viewport edges. Collapses to an icon + current-section label once you've
-     scrolled past the hero, expands back to the full nav at the top of the page. -->
-<nav id="site-nav" class="fixed top-4 sm:top-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-5xl">
-	<div id="nav-pill" class="w-full flex justify-center items-center bg-black/95 backdrop-blur-md rounded-full shadow-lg shadow-black/20 pl-5 pr-2 py-2 transition-all duration-300 mx-auto">
-		<!-- Full nav content -->
-		<div id="nav-full" class="flex justify-between items-center gap-4 w-full">
+     viewport edges. Smoothly resizes (real pixel width, GSAP-animated, not a
+     display:none/flex snap) to a compact icon + current-section pill once
+     you've scrolled past the hero, and back to the full nav at the top. -->
+<nav id="site-nav" class="fixed top-4 sm:top-6 inset-x-4 sm:inset-x-6 max-w-5xl mx-auto z-50">
+	<div id="nav-pill" class="relative flex items-center w-full mx-auto bg-black/95 backdrop-blur-md rounded-full shadow-lg shadow-black/20 overflow-hidden">
+		<!-- Full nav content — normal flow, its natural size is the pill's "expanded" width -->
+		<div id="nav-full" class="flex justify-between items-center gap-4 pl-5 pr-2 py-2 w-full">
 			<a href="/" class="flex items-center gap-2 shrink-0">
 				<img src="/favicon.svg" alt="RevvFi Logo" class="h-8 w-8" />
 				<span class="text-lg font-bold tracking-tight text-white">RevvFi</span>
@@ -48,19 +59,25 @@ const links = [
 			</button>
 		</div>
 
-		<!-- Collapsed "island" content: icon + current section label + live dot -->
-		<a
-			id="nav-collapsed"
-			href="/"
-			class="hidden items-center gap-3 px-3"
-		>
-			<img src="/favicon.svg" alt="RevvFi Logo" class="h-6 w-6" />
-			<span id="nav-current-section" class="text-sm font-semibold text-white">Overview</span>
-			<span class="relative flex h-2.5 w-2.5">
-				<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-				<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+		<!-- Collapsed "island" content: icon + current section label + loader ring.
+		     Absolutely positioned (left/top only, no right/bottom) so it keeps its
+		     own natural compact width instead of stretching to match nav-full —
+		     that natural width is exactly what gets measured for the collapse
+		     animation below. -->
+		<div id="nav-collapsed" class="absolute left-0 top-0 flex items-center gap-3 px-5 py-2.5 opacity-0 pointer-events-none whitespace-nowrap">
+			<img src="/favicon.svg" alt="RevvFi Logo" class="h-6 w-6 shrink-0" />
+			<span id="nav-current-section" class="text-base font-semibold text-white leading-none shrink-0">{pageLabel}</span>
+			<span class="nav-loader relative flex h-5 w-5 shrink-0" aria-hidden="true">
+				<svg viewBox="0 0 24 24" class="h-full w-full">
+					<circle cx="12" cy="12" r="9" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="3" />
+					<circle
+						class="nav-loader-arc"
+						cx="12" cy="12" r="9" fill="none" stroke="var(--color-primary, #ff5d01)" stroke-width="3"
+						stroke-linecap="round" stroke-dasharray="14 42"
+					/>
+				</svg>
 			</span>
-		</a>
+		</div>
 	</div>
 
 	<div id="mobile-menu" class="hidden lg:hidden mt-2 bg-black/95 backdrop-blur-md rounded-3xl shadow-lg shadow-black/20">
@@ -78,7 +95,21 @@ const links = [
 	</div>
 </nav>
 
+<style>
+	.nav-loader-arc {
+		transform-origin: 12px 12px;
+		animation: nav-loader-spin 1s linear infinite;
+	}
+	@keyframes nav-loader-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+</style>
+
 <script>
+	import { gsap } from 'gsap';
+
 	const button = document.getElementById('mobile-menu-button');
 	const menu = document.getElementById('mobile-menu');
 	const menuIcon = document.getElementById('menu-icon');
@@ -90,9 +121,10 @@ const links = [
 		closeIcon?.classList.toggle('hidden');
 	});
 
-	// "Dynamic island" collapse: once scrolled past the hero, shrink the pill
-	// down to icon + current-section label; expand back to the full nav at
-	// the top of the page.
+	// "Dynamic island" collapse: smoothly resizes the pill to a real measured
+	// pixel width (GSAP-tweened) instead of snapping via display:none/flex,
+	// and crossfades the two content layers instead of hard-toggling them.
+	const siteNav = document.getElementById('site-nav');
 	const navPill = document.getElementById('nav-pill');
 	const navFull = document.getElementById('nav-full');
 	const navCollapsed = document.getElementById('nav-collapsed');
@@ -108,50 +140,97 @@ const links = [
 		.filter((s) => s.el);
 
 	const COLLAPSE_THRESHOLD = 120;
+	const RESIZE_DURATION_S = 0.5;
+	const CROSSFADE_DURATION_S = 0.25;
 
-	function setCollapsed(collapsed: boolean) {
-		if (!navFull || !navCollapsed || !navPill) return;
-		if (collapsed) {
-			navFull.classList.add('hidden');
-			navCollapsed.classList.remove('hidden');
-			navCollapsed.classList.add('flex');
-			navPill.classList.remove('w-full');
-			navPill.classList.add('w-fit');
-		} else {
-			navFull.classList.remove('hidden');
-			navCollapsed.classList.add('hidden');
-			navCollapsed.classList.remove('flex');
-			navPill.classList.add('w-full');
-			navPill.classList.remove('w-fit');
+	if (siteNav && navPill && navFull && navCollapsed) {
+		let isCollapsed = false;
+		let fullWidth = 0;
+		let collapsedWidth = 0;
+
+		function measure() {
+			// Measured from #site-nav (pure CSS width via inset-x/max-w/mx-auto,
+			// never touched by JS) rather than #nav-full, which is itself
+			// `w-full` of #nav-pill — the very element GSAP locks a pixel width
+			// onto below. Measuring #nav-full would create a circular
+			// dependency: once #nav-pill's inline width is ever wrong (e.g. a
+			// `resize` event — reliably fired when DevTools opens/closes —
+			// landing mid-transition), every later "measurement" just reads
+			// back that same stale value through #nav-full and re-locks it
+			// forever, since #nav-full's width is derived FROM #nav-pill's
+			// current width rather than the true available space.
+			fullWidth = siteNav!.getBoundingClientRect().width;
+			collapsedWidth = navCollapsed!.getBoundingClientRect().width;
+			// Lock the pill to its current (expanded, at rest) width explicitly
+			// so the very first collapse has a real pixel start-point to tween
+			// from rather than an implicit "auto".
+			if (!isCollapsed) gsap.set(navPill, { width: fullWidth });
 		}
-	}
+		measure();
+		window.addEventListener('resize', measure, { passive: true });
 
-	function updateCurrentSection() {
-		const triggerLine = window.innerHeight * 0.35;
-		let active: string | null = null;
-		for (const s of trackedSections) {
-			const rect = s.el!.getBoundingClientRect();
-			if (rect.top <= triggerLine) {
-				active = s.label;
+		function setCollapsed(collapsed: boolean) {
+			if (collapsed === isCollapsed) return;
+			isCollapsed = collapsed;
+
+			gsap.to(navPill, {
+				width: collapsed ? collapsedWidth : fullWidth,
+				duration: RESIZE_DURATION_S,
+				ease: 'power2.inOut',
+			});
+			gsap.to(collapsed ? navFull : navCollapsed, {
+				opacity: 0,
+				duration: CROSSFADE_DURATION_S,
+				ease: 'sine.inOut',
+			});
+			gsap.to(collapsed ? navCollapsed : navFull, {
+				opacity: 1,
+				duration: CROSSFADE_DURATION_S,
+				delay: RESIZE_DURATION_S - CROSSFADE_DURATION_S,
+				ease: 'sine.inOut',
+			});
+			(collapsed ? navCollapsed : navFull)!.classList.remove('pointer-events-none');
+			(collapsed ? navFull : navCollapsed)!.classList.add('pointer-events-none');
+		}
+
+		function updateCurrentSection() {
+			const triggerLine = window.innerHeight * 0.35;
+			let active: string | null = null;
+			for (const s of trackedSections) {
+				const rect = s.el!.getBoundingClientRect();
+				if (rect.top <= triggerLine) {
+					active = s.label;
+				}
+			}
+			if (active && currentSectionLabel && currentSectionLabel.textContent !== active) {
+				currentSectionLabel.textContent = active;
+				// Different labels have different natural widths ("FAQ" vs.
+				// "Why RevvFi") — re-measure the collapsed pill's content
+				// width now that the text actually changed, and resync the
+				// pill to it. Without this, whichever label collapsed first
+				// keeps that width locked forever, so a longer label later
+				// on overflows past the pill's rounded edge instead of the
+				// pill smoothly resizing to fit it.
+				collapsedWidth = navCollapsed!.getBoundingClientRect().width;
+				if (isCollapsed) {
+					gsap.to(navPill, { width: collapsedWidth, duration: RESIZE_DURATION_S, ease: 'power2.inOut' });
+				}
 			}
 		}
-		if (active && currentSectionLabel) {
-			currentSectionLabel.textContent = active;
+
+		let ticking = false;
+		function onScroll() {
+			if (ticking) return;
+			ticking = true;
+			requestAnimationFrame(() => {
+				const collapsed = window.scrollY > COLLAPSE_THRESHOLD;
+				setCollapsed(collapsed);
+				if (collapsed) updateCurrentSection();
+				ticking = false;
+			});
 		}
-	}
 
-	let ticking = false;
-	function onScroll() {
-		if (ticking) return;
-		ticking = true;
-		requestAnimationFrame(() => {
-			const collapsed = window.scrollY > COLLAPSE_THRESHOLD;
-			setCollapsed(collapsed);
-			if (collapsed) updateCurrentSection();
-			ticking = false;
-		});
+		window.addEventListener('scroll', onScroll, { passive: true });
+		onScroll();
 	}
-
-	window.addEventListener('scroll', onScroll, { passive: true });
-	onScroll();
 </script>

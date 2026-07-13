@@ -1,0 +1,103 @@
+---
+// Infinite auto-scrolling logo marquee — the real infrastructure this
+// protocol actually runs on, not placeholder logos.
+const logos = [
+  { src: '/supabase-logo-icon.svg', alt: 'Supabase' },
+  { src: '/cloudflare-svgrepo-com.svg', alt: 'Cloudflare' },
+  { src: '/aws-svgrepo-com.svg', alt: 'AWS' },
+  { src: '/github-actions-svgrepo-com.svg', alt: 'GitHub Actions' },
+  { src: '/vercel-svgrepo-com.svg', alt: 'Vercel' },
+  { src: '/Astro.svg', alt: 'Astro' },
+  { src: '/nextjs-icon-svgrepo-com.svg', alt: 'Next.js' },
+  { src: '/Go.svg', alt: 'Go' },
+  { src: '/PostgresSQL.svg', alt: 'PostgreSQL' },
+  { src: '/TypeScript.svg', alt: 'TypeScript' },
+  { src: '/Solidity.svg', alt: 'Solidity' },
+  { src: '/foundry.png', alt: 'Foundry' },
+  { src: '/chainlink-link-logo.svg', alt: 'Chainlink' },
+  { src: '/NGINX.svg', alt: 'NGINX' },
+  { src: '/Node.js.svg', alt: 'Node.js' },
+  { src: '/polygon-matic-logo.svg', alt: 'Polygon' },
+  { src: '/nextra.svg', alt: 'Nextra' },
+];
+---
+
+<section class="relative py-8 bg-white border-y border-black/5 overflow-hidden">
+  <div class="marquee-mask relative">
+    <div class="marquee-track flex items-center gap-12 w-max" data-marquee-track>
+      <!--
+        Logos rendered twice back-to-back so there's always a second copy
+        ready to continue the loop. The old approach animated to a CSS
+        translateX(-50%), which only lands exactly on the second copy's
+        start if there's zero gap between copies — with `gap-12` between
+        flex children, that's off by half a gap-width, producing a small
+        visible snap at every loop restart. Fixed below by measuring the
+        real rendered distance between the two copies at runtime instead
+        of assuming a percentage.
+      -->
+      {[0, 1].map((i) => (
+        <div class="flex items-center gap-12 shrink-0" data-marquee-copy={i}>
+          {logos.map((logo) => (
+            <img src={logo.src} alt={logo.alt} class="h-9 w-auto object-contain" loading="lazy" />
+          ))}
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .marquee-mask {
+    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  }
+  .marquee-track {
+    will-change: transform;
+  }
+</style>
+
+<script>
+  import { gsap } from 'gsap';
+
+  // Pixels per second — kept constant regardless of how many logos are in
+  // the strip, so the perceived speed never changes as more get added.
+  const SPEED_PX_PER_S = 60;
+
+  function setupMarquee(track: HTMLElement) {
+    const copies = Array.from(track.querySelectorAll<HTMLElement>('[data-marquee-copy]'));
+    if (copies.length < 2) return;
+
+    function play() {
+      // The exact on-screen distance from the start of copy 1 to the start
+      // of copy 2 — this already correctly accounts for the flex `gap`,
+      // unlike a hardcoded -50% translate, so looping here lands on a
+      // frame that's pixel-identical to the starting frame. No snap.
+      const distance = copies[1].getBoundingClientRect().left - copies[0].getBoundingClientRect().left;
+      if (distance <= 0) return;
+
+      gsap.killTweensOf(track);
+      gsap.set(track, { x: 0 });
+      gsap.to(track, {
+        x: -distance,
+        duration: distance / SPEED_PX_PER_S,
+        ease: 'none',
+        repeat: -1,
+      });
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (!reduceMotion.matches) play();
+    reduceMotion.addEventListener('change', (e) => {
+      if (e.matches) gsap.killTweensOf(track);
+      else play();
+    });
+
+    // Logo image sizes can shift the measured distance slightly once
+    // fonts/images finish loading, or on viewport resize — resync then.
+    window.addEventListener('resize', () => {
+      if (!reduceMotion.matches) play();
+    });
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-marquee-track]').forEach(setupMarquee);
+</script>

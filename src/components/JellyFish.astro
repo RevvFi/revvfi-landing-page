@@ -177,14 +177,14 @@ const PARTICLE_COUNT = 24;
 	// Magnetic cursor — an invisible current, not a direct follow.
 	// Heavy damping: slow to approach, even slower to drift back.
 	// ============================================================
-	const HOVER_MAX_TRANSLATE_PX = 12;
-	const HOVER_MAX_ROTATE_DEG = 3;
-	const HOVER_INFLUENCE_RADIUS_PX = 280;
-	const HOVER_APPROACH_DURATION_S = 1.4;
-	const HOVER_RELEASE_DURATION_S = 2.2;
+	const HOVER_MAX_TRANSLATE_PX = 26;
+	const HOVER_MAX_ROTATE_DEG = 7;
+	const HOVER_INFLUENCE_RADIUS_PX = 420;
+	const HOVER_APPROACH_DURATION_S = 0.9;
+	const HOVER_RELEASE_DURATION_S = 1.6;
 	// Tentacles sway opposite the cursor direction, more than the body does.
-	const TENTACLE_HOVER_COUNTER_FACTOR = -0.4;
-	const TENTACLE_HOVER_DURATION_S = 1.6;
+	const TENTACLE_HOVER_COUNTER_FACTOR = -0.7;
+	const TENTACLE_HOVER_DURATION_S = 1.1;
 
 	// Note on "parallax" (body 100% / bell 95% / inner-body 105% /
 	// tentacles 120%): as literally specified this is a 4-tier depth
@@ -323,48 +323,55 @@ const PARTICLE_COUNT = 24;
 			return { x: parseFloat(match[1]), y: parseFloat(match[2]) };
 		}
 
-		const tentaclePaths: { el: SVGPathElement; x: number }[] = [];
+		const candidatePaths: { el: SVGPathElement; x: number }[] = [];
 		for (const p of allPaths) {
 			const t = pathTranslate(p);
 			if (!t) continue;
-			if (t.y >= thresholdY) tentaclePaths.push({ el: p, x: t.x });
+			if (t.y >= thresholdY) candidatePaths.push({ el: p, x: t.x });
 		}
 
-		if (tentaclePaths.length > 0) {
-			// Each path needs its OWN pivot point for rotation/skew to look
-			// right. `transform-origin: 50% 0%` combined with
-			// `transform-box: fill-box` was the previous approach, but
-			// fill-box support for SVG children — especially layered under
-			// an existing `transform="translate(...)"` XML attribute, which
-			// every path here has — is inconsistent enough in practice that
-			// it visibly broke: some paths were pivoting around the whole
-			// SVG's origin instead of their own tiny bounding box, so a
-			// small rotation sent them swinging across a huge visible arc.
-			// Computing each path's own bounding box via getBBox() and
-			// setting an explicit pixel transform-origin in that path's own
-			// local coordinate space sidesteps fill-box entirely — pixel
-			// values are unambiguous, no box-model interpretation needed.
-			for (const { el } of tentaclePaths) {
-				try {
-					const bbox = el.getBBox();
-					const originX = bbox.x + bbox.width / 2;
-					const originY = bbox.y;
-					gsap.set(el, { transformOrigin: `${originX}px ${originY}px` });
-				} catch {
-					// getBBox can throw for a path with no renderable geometry
-					// (zero-length data) — leave that one at the CSS default
-					// origin rather than let it block the rest.
-				}
-			}
+		// Animating individual <path> elements directly turned out to be the
+		// real source of the recurring "flying rectangle" glitch: every path
+		// here already carries an XML `transform="translate(...)"`
+		// presentation attribute, and layering a GSAP-driven CSS `transform`
+		// (rotation/skew) on top of that is a genuinely inconsistent area
+		// across browsers — when the two don't compose the way a correct
+		// transform-origin calculation assumes, the path's base translate
+		// gets clobbered and it jumps to a wrong position the instant any
+		// rotation applies. A per-path getBBox()-based origin fix (the
+		// previous attempt) didn't address this because the conflict isn't
+		// about *where the origin is*, it's about *attribute vs. CSS
+		// transform ownership* on the same element.
+		//
+		// The robust fix: never put a CSS transform directly on a path that
+		// already owns an XML transform attribute. Each strand's paths are
+		// grouped into a fresh <g> (which has no attribute-transform
+		// baggage of its own), and GSAP only ever animates the *group*. The
+		// individual paths keep their original, untouched attribute
+		// transforms and are simply carried along by their parent group.
+		const strandGroups: SVGGElement[] = [];
+		if (candidatePaths.length > 0) {
+			candidatePaths.sort((a, b) => a.x - b.x);
+			const perStrand = Math.ceil(candidatePaths.length / STRAND_COUNT);
+			const svgNS = 'http://www.w3.org/2000/svg';
 
-			// Cluster tentacle paths into independent strands by x-position so
-			// each "tentacle" gets its own duration/delay/amplitude instead of
-			// the whole region moving as one uniform mass.
-			tentaclePaths.sort((a, b) => a.x - b.x);
-			const perStrand = Math.ceil(tentaclePaths.length / STRAND_COUNT);
 			for (let s = 0; s < STRAND_COUNT; s++) {
-				const strandEls = tentaclePaths.slice(s * perStrand, (s + 1) * perStrand).map((t) => t.el);
-				if (strandEls.length === 0) continue;
+				const strandCandidates = candidatePaths.slice(s * perStrand, (s + 1) * perStrand);
+				if (strandCandidates.length === 0) continue;
+
+				const group = document.createElementNS(svgNS, 'g');
+				svgEl.appendChild(group);
+				strandCandidates.forEach(({ el }) => group.appendChild(el));
+
+				let bbox: DOMRect;
+				try {
+					bbox = group.getBBox();
+				} catch {
+					// No renderable geometry in this strand — leave it unanimated.
+					continue;
+				}
+				gsap.set(group, { transformOrigin: `${bbox.x + bbox.width / 2}px ${bbox.y}px` });
+				strandGroups.push(group);
 
 				const duration = random(STRAND_DURATION_MIN_S, STRAND_DURATION_MAX_S);
 				const delay = TENTACLE_BASE_LAG_S + random(0, STRAND_DELAY_MAX_S);
@@ -372,16 +379,15 @@ const PARTICLE_COUNT = 24;
 				const skewAmp = random(STRAND_SKEW_MIN_DEG, STRAND_SKEW_MAX_DEG);
 				const scaleYAmp = 1 + Math.random() * (STRAND_SCALE_Y_MAX - 1);
 
-				gsap.to(strandEls, {
-					rotation: gsap.utils.random(-rotateAmp, rotateAmp),
-					skewX: gsap.utils.random(-skewAmp, skewAmp),
+				gsap.to(group, {
+					rotation: random(-rotateAmp, rotateAmp),
+					skewX: random(-skewAmp, skewAmp),
 					scaleY: scaleYAmp,
 					duration,
 					delay,
 					ease: 'sine.inOut',
 					repeat: -1,
 					yoyo: true,
-					stagger: { each: 0.015, from: 'random' },
 				});
 			}
 		}
@@ -465,16 +471,13 @@ const PARTICLE_COUNT = 24;
 				ease: 'power2.inOut',
 			});
 
-			if (tentaclePaths.length > 0) {
-				gsap.to(
-					tentaclePaths.map((t) => t.el),
-					{
-						x: tx * TENTACLE_HOVER_COUNTER_FACTOR,
-						duration: TENTACLE_HOVER_DURATION_S,
-						ease: 'sine.inOut',
-						overwrite: 'auto',
-					}
-				);
+			if (strandGroups.length > 0) {
+				gsap.to(strandGroups, {
+					x: tx * TENTACLE_HOVER_COUNTER_FACTOR,
+					duration: TENTACLE_HOVER_DURATION_S,
+					ease: 'sine.inOut',
+					overwrite: 'auto',
+				});
 			}
 		}
 
@@ -486,11 +489,8 @@ const PARTICLE_COUNT = 24;
 				duration: HOVER_RELEASE_DURATION_S,
 				ease: 'power1.inOut',
 			});
-			if (tentaclePaths.length > 0) {
-				gsap.to(
-					tentaclePaths.map((t) => t.el),
-					{ x: 0, duration: HOVER_RELEASE_DURATION_S, ease: 'power1.inOut', overwrite: 'auto' }
-				);
+			if (strandGroups.length > 0) {
+				gsap.to(strandGroups, { x: 0, duration: HOVER_RELEASE_DURATION_S, ease: 'power1.inOut', overwrite: 'auto' });
 			}
 		}
 

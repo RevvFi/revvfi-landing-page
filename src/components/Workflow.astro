@@ -6,7 +6,7 @@
 // technologies. Content (steps, titles, descriptions, numbers) is
 // unchanged from the previous version, only the presentation is new.
 import { Network, ClipboardList, Vault, ArrowLeftRight, TrendingUp, CircleCheckBig } from '@lucide/astro';
-import JellyFish from './JellyFish.astro';
+import TracedIllustration from './TracedIllustration.astro';
 
 const steps = [
   {
@@ -47,7 +47,6 @@ const steps = [
   },
 ];
 
-const modules = ["Factory", "OfferBook", "Escrow", "Liquidator", "Reputation"];
 ---
 
 <section id="workflow" class="relative py-28 overflow-hidden bg-white">
@@ -77,26 +76,12 @@ const modules = ["Factory", "OfferBook", "Escrow", "Liquidator", "Reputation"];
           <span class="text-primary">Lending Cycle</span>
         </h2>
 
-        <p class="text-muted-foreground text-lg leading-relaxed mb-10 max-w-md" data-wf-fade>
+        <p class="text-muted-foreground text-lg leading-relaxed mb-8 max-w-md" data-wf-fade>
           A deterministic flow executing capital deployment from market creation to final withdrawal logic.
         </p>
 
-        <div class="flex justify-center lg:justify-start mb-10" data-wf-fade>
-          <JellyFish width={280} height={264} />
-        </div>
-
-        <!-- Premium glass module card -->
-        <div class="glass rounded-2xl p-6" data-wf-fade>
-          <div class="text-primary font-bold text-xs uppercase tracking-widest mb-1">Modular System</div>
-          <p class="text-muted-foreground text-sm mb-5">Built for extensibility</p>
-          <ul class="flex flex-col gap-2.5">
-            {modules.map((m) => (
-              <li class="flex items-center gap-2.5 text-sm font-medium text-foreground/80 opacity-0" data-wf-module>
-                <span class="w-1 h-1 rounded-full bg-primary"></span>
-                {m}
-              </li>
-            ))}
-          </ul>
+        <div class="flex justify-center lg:justify-start" data-wf-fade>
+          <TracedIllustration src="/tech_blocks.svg" width={280} height={264} />
         </div>
       </div>
 
@@ -191,7 +176,6 @@ const modules = ["Factory", "OfferBook", "Escrow", "Liquidator", "Reputation"];
 		const cards = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-card]'));
 		const connector = section.querySelector<HTMLElement>('[data-wf-connector]');
 		const leftFadeEls = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-fade]'));
-		const moduleItems = Array.from(section.querySelectorAll<HTMLElement>('[data-wf-module]'));
 		const particles = Array.from(section.querySelectorAll<HTMLElement>('.wf-particle'));
 		const timelineElMaybe = section.querySelector<HTMLElement>('[data-wf-timeline]');
 		if (cards.length === 0 || !connector || !timelineElMaybe) return;
@@ -243,24 +227,6 @@ const modules = ["Factory", "OfferBook", "Escrow", "Liquidator", "Reputation"];
 			{ threshold: 0.15, rootMargin: '0px 0px -10% 0px' }
 		);
 		cards.forEach((card) => revealObserver.observe(card));
-
-		// ---- Module list: fade in once the glass card is in view ----
-		const moduleObserver = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((entry) => {
-					if (!entry.isIntersecting) return;
-					gsap.to(moduleItems, {
-						opacity: 1,
-						duration: 0.5,
-						ease: 'power2.out',
-						stagger: 0.08,
-					});
-					moduleObserver.disconnect();
-				});
-			},
-			{ threshold: 0.4 }
-		);
-		if (moduleItems[0]) moduleObserver.observe(moduleItems[0].closest('.glass') ?? moduleItems[0]);
 
 		// ---- Active step tracking: grows the orange connector line and
 		// marks every step up to the current one as active. ----

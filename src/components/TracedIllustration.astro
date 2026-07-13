@@ -1,0 +1,104 @@
+---
+// Inlines a traced-vector SVG asset as-authored (no redrawing). This covers
+// server.svg, tech_blocks.svg, and jelly-fish.svg — all exported the same
+// way: a flattened trace whose very first <path>, immediately after the
+// opening <svg> tag, is an opaque corner-to-corner background plate rather
+// than actual artwork. Stripping just that first element (generically, not
+// matched to one specific file's coordinates/fill color) is what lets any
+// of these sit directly on a section's own background with no card, no
+// border, nothing reading as a separate boxed asset.
+import fs from 'node:fs';
+import path from 'node:path';
+
+interface Props {
+	src?: string;
+	width?: number;
+	height?: number;
+	class?: string;
+	glow?: boolean;
+}
+
+const { src = '/server.svg', width = 280, height = 264, class: className = '', glow = false } = Astro.props;
+
+const svgPath = path.join(process.cwd(), 'public', src);
+let svgMarkup = fs.readFileSync(svgPath, 'utf-8');
+
+svgMarkup = svgMarkup.replace(
+	/<svg([^>]*)width="(\d+)"([^>]*)height="(\d+)"([^>]*)>/,
+	(_match: string, a: string, w: string, b: string, h: string, c: string) =>
+		`<svg${a}width="100%"${b}height="100%"${c} viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">`
+);
+
+// Strip whichever <path> comes immediately after the (now-modified) opening
+// <svg> tag — that's always the background plate in this export style,
+// regardless of its specific fill color or canvas size.
+svgMarkup = svgMarkup.replace(/(<svg[^>]*>)\s*<path[^>]*\/>/, '$1');
+---
+
+<div class:list={["traced-illustration relative", className]} style={`width:${width}px; height:${height}px;`} data-traced-illustration>
+	{glow && <div class="traced-glow absolute left-1/2 bottom-0 -translate-x-1/2 w-2/3 h-1/3 bg-primary/30 blur-[42px] rounded-full" aria-hidden="true" />}
+	<div class="traced-float relative w-full h-full" set:html={svgMarkup} />
+</div>
+
+<style>
+	.traced-illustration :global(svg) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+	.traced-float {
+		will-change: transform;
+	}
+	.traced-glow {
+		will-change: opacity, transform;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	const FLOAT_Y_PX = 7; // spec range 5-8px
+	const FLOAT_DURATION_S = 6.5;
+	const ROTATE_DEG = 1.5; // spec range 1-2deg
+	const ROTATE_DURATION_S = 8;
+	const GLOW_MIN_OPACITY = 0.5;
+	const GLOW_MAX_OPACITY = 0.85;
+	const GLOW_PULSE_DURATION_S = 4;
+
+	function setup(container: HTMLElement) {
+		const floatLayer = container.querySelector<HTMLElement>('.traced-float');
+		const glowLayer = container.querySelector<HTMLElement>('.traced-glow');
+		if (!floatLayer) return;
+
+		gsap.set(floatLayer, { transformOrigin: '50% 50%' });
+		gsap.to(floatLayer, {
+			y: -FLOAT_Y_PX,
+			duration: FLOAT_DURATION_S,
+			ease: 'sine.inOut',
+			repeat: -1,
+			yoyo: true,
+		});
+		gsap.fromTo(
+			floatLayer,
+			{ rotation: -ROTATE_DEG },
+			{ rotation: ROTATE_DEG, duration: ROTATE_DURATION_S, ease: 'sine.inOut', repeat: -1, yoyo: true }
+		);
+
+		if (glowLayer) {
+			gsap.fromTo(
+				glowLayer,
+				{ opacity: GLOW_MIN_OPACITY, scale: 0.95 },
+				{
+					opacity: GLOW_MAX_OPACITY,
+					scale: 1.05,
+					duration: GLOW_PULSE_DURATION_S,
+					ease: 'sine.inOut',
+					repeat: -1,
+					yoyo: true,
+				}
+			);
+		}
+	}
+
+	document.querySelectorAll<HTMLElement>('[data-traced-illustration]').forEach(setup);
+</script>
